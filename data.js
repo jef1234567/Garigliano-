@@ -5,7 +5,7 @@
 const CFG={
   prefix:"garigliano44_",            // préfixe du stockage local : propre à cette appli, pour ne pas se mélanger avec Sedan
   title:"Garigliano 1944", short:"Garigliano 1944", sub:"Mai 1944, du Garigliano à Pico", fileTag:"Garigliano",
-  version:"Version du 02/10, 17 h 30",
+  version:"Version du 02/10, 18 h",
   intro:["Tenez le téléphone à la verticale et balayez l'horizon : les unités s'affichent dans leur direction réelle et à leur hauteur réelle, avec la distance.",
          "11 phases, du 11 au 25 mai 1944 : la rupture de la ligne Gustav, puis l'exploitation jusqu'à Pico. Fonctionne hors ligne après un premier chargement."],
   warn:"Positions des unités reprises de l'atelier de narration et recalées sur les lieux géolocalisés : indicatives, à l'échelle de la division. Points d'observation provisoires, à remplacer par le programme du déplacement.",
@@ -125,7 +125,7 @@ const ODB=[
   {id:"rtm6", s:"F", t:"mtn", e:"III", num:"6", par:"4", parent:"dmm4", name:"6e régiment de tirailleurs marocains"},
   {id:"ram69", s:"F", t:"art", e:"III", num:"69", par:"4", parent:"dmm4", name:"69e régiment d'artillerie de montagne"},
   {id:"gtm", s:"F", t:"goum", e:"X", num:"GTM", par:"CEF", parent:"cef", name:"Groupements de tabors marocains — Guillaume",
-    comp:"1er, 3e et 4e GTM (7 833 goumiers), commandés par les colonels Leblanc, Massiet du Biest et le lieutenant-colonel Gautier. Forment le corps de montagne avec la 4e DMM."},
+    comp:"1er, 3e et 4e GTM (7 833 goumiers), commandés par Leblanc, Boyer de Latour et Massiet du Biest (atelier). Forment le corps de montagne avec la 4e DMM."},
   {id:"gtm1", s:"F", t:"goum", e:"III", num:"1", par:"GTM", parent:"gtm", name:"1er groupement de tabors marocains"},
   {id:"gtm3", s:"F", t:"goum", e:"III", num:"3", par:"GTM", parent:"gtm", name:"3e groupement de tabors marocains"},
   {id:"gtm4", s:"F", t:"goum", e:"III", num:"4", par:"GTM", parent:"gtm", name:"4e groupement de tabors marocains"},
@@ -161,7 +161,7 @@ const PHASES=[
  {d:12,lab:"12 mai",fb:"R",t:"Le 12 mai, l’attaque piétine",f:"Le 12 mai au soir, malgré deux succès locaux, Castelforte et le mont Faito, l’attaque ne perce pas : les positions, minées et préparées depuis des mois, résistent.",q:"Que doit faire un chef dont l’attaque piétine au soir du premier jour ?"},
  {d:13,lab:"13 mai",fb:"R",t:"Le drapeau sur le Majo",f:"Vers 15 h 30, un drapeau tricolore de trente mètres carrés est hissé au sommet du Majo, visible à des kilomètres à la ronde.",q:"Quels indices montrent qu’une défense est rompue, et pas seulement repoussée ?"},
  {d:14,lab:"14–15 mai",fb:"R",t:"L’Ausente franchi, la montagne ouverte",f:"Le 14 mai, la rive gauche de l’Ausente est nettoyée ; le 15, le corps expéditionnaire force l’entrée du massif de la Petrella, à Castello.",q:"Pourquoi engager les troupes de montagne maintenant, et pas dès le premier jour ?"},
- {d:15,lab:"15–17 mai",fb:"R",t:"Goumiers et mulets dans les Aurunci",f:"Le corps de montagne réunit la 4e division marocaine de montagne et trois groupements de tabors marocains, commandés par les colonels Leblanc, Massiet du Biest et le lieutenant-colonel Gautier.",q:"Qu’est-ce qui fait qu’une troupe transforme un obstacle en axe de manœuvre ?"},
+ {d:15,lab:"15–17 mai",fb:"R",t:"Goumiers et mulets dans les Aurunci",f:"Le corps de montagne réunit la 4e division marocaine de montagne et trois groupements de tabors marocains, commandés par Leblanc, Boyer de Latour et Massiet du Biest.",q:"Qu’est-ce qui fait qu’une troupe transforme un obstacle en axe de manœuvre ?"},
  {d:17,lab:"17 mai",fb:"R",t:"Esperia tombe, la charnière saute",f:"Esperia est conquise les 16 et 17 mai, sous la menace des colonnes de montagne qui débordent la défense par le sud.",q:"Pourquoi des renforts engagés par fractions ne colmatent-ils pas une brèche ?"},
  {d:18,lab:"18 mai",fb:"R",t:"Cassino tombe, retour sur la ligne Senger",f:"Le 18 mai, le 2e corps polonais occupe les ruines de l’abbaye du Mont-Cassin, évacuées par les parachutistes allemands.",q:"Dans une coalition, comment mesurer la part de chacun dans la victoire ?"},
  {d:19,lab:"19–22 mai",fb:"R",t:"Pico, verrou de la ligne Senger",f:"Pico tombe le 22 mai après de violents combats ; du 23 au 25 mai, la 26e Panzerdivision contre-attaque encore face au corps expéditionnaire.",q:"Comment une infanterie sans chars en nombre tient-elle face à une division blindée ?"},
