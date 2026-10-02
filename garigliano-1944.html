@@ -1356,16 +1356,20 @@ const synth=window.speechSynthesis;
 let voiceOn=true,vlist=[],vpick=null,speakTok=0,sentIdx=0,subsOn=true,speedF=1,cps=15;
 let stepT=null,stepStart=0,stepRemain=null,wasPlaying=false,finalOn=false;
 const INTRO=1.2,OUTRO=1.6;
+/* version autonome : voix enregistrée (window.AUD = 14 étapes × phrases, data:audio/mpeg) ; sinon synthèse du navigateur */
+const HAVEAUD=Array.isArray(window.AUD)&&window.AUD.length===NARR.length;
+const A=new Audio();A.preload='auto';let audioBad=false;
+if(HAVEAUD){cps=18;document.querySelector('.src').append(' Voix intégrée : synthèse Piper, jeu de données SIWIS (CC BY 4.0, université d’Édimbourg).');}
 const vscore=v=>(/natural|online|neural/i.test(v.name)?10:0)+(/fr[-_]FR/i.test(v.lang)?3:0);
 let speechBad=false;
 /* Android : getVoices() reste souvent vide jusqu'au premier speak() ; on tente donc de parler avec lang=fr-FR et on ne bascule en mode sans voix que si la synthèse échoue vraiment */
-const canSpeak=()=>voiceOn&&!!synth&&!speechBad;
+const canSpeak=()=>voiceOn&&!audioBad&&(HAVEAUD||(!!synth&&!speechBad));
 function speechFail(tok){if(tok!==speakTok||speechBad)return;speechBad=true;try{synth.cancel();}catch(e){}toast('La voix n’a pas démarré sur cet appareil : lecture sans voix. Touchez « Voix » pour réessayer.');stepRemain=null;refreshSub();if(playing)runStep();}
 function loadVoices(){
   if(!synth)return;vlist=synth.getVoices().filter(v=>/^fr/i.test(v.lang)).sort((a,b)=>vscore(b)-vscore(a));
   const sel=$('vsel');sel.replaceChildren(...vlist.map(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name.replace(/^(Microsoft|Google)\s+/,'').replace(/\s*Online \(Natural\)\s*-?\s*/,' ').slice(0,38);return o;}));
   let saved=null;try{saved=localStorage.getItem(CFG.voixKey);}catch(e){}
-  vpick=vlist.find(v=>v.name===saved)||vlist[0]||null;if(vpick)sel.value=vpick.name;sel.hidden=!vlist.length||!voiceOn;
+  vpick=vlist.find(v=>v.name===saved)||vlist[0]||null;if(vpick)sel.value=vpick.name;sel.hidden=!vlist.length||!voiceOn||HAVEAUD;
 }
 if(synth){loadVoices();synth.onvoiceschanged=loadVoices;
   /* iOS : voiceschanged n'est pas toujours émis ; on réinterroge quelques secondes */
@@ -1373,6 +1377,7 @@ if(synth){loadVoices();synth.onvoiceschanged=loadVoices;
 const IOS=/iP(hone|ad|od)/.test(navigator.platform)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)||/iPhone|iPad/.test(navigator.userAgent);
 let speechUnlocked=false;
 function unlockSpeech(){ /* à appeler dans le geste : iOS n'autorise la voix qu'après une action de l'utilisateur */
+  if(HAVEAUD&&!A._u){A._u=1;try{A.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';const q=A.play();if(q&&q.catch)q.catch(()=>{});}catch(e){}}
   if(synth&&!speechUnlocked){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='fr-FR';synth.speak(u);speechUnlocked=true}catch(e){}}
   if(synth&&synth.paused)try{synth.resume()}catch(e){}
 }
@@ -1382,7 +1387,7 @@ function refreshSub(){showSub(playing&&canSpeak()?'':NARR[cur]);}
 const estStep=i=>NARR[i].length/cps+INTRO+OUTRO;
 function upTotal(){const t=(shortOn?SHORT:NARR.map((_,i)=>i)).reduce((a,i)=>a+estStep(i),0)/speedF;$('total').textContent=`≈ ${Math.round(t/60)} min au total`;}
 function hold(){
-  clearTimeout(stepT);
+  clearTimeout(stepT);A.pause();A.onended=A.onplaying=A.onerror=null;
   if(stepStart){stepRemain=Math.max(0,stepRemain-(performance.now()-stepStart));stepStart=0;}
   speakTok++;if(synth)synth.cancel();
 }
@@ -1392,7 +1397,24 @@ function runStep(){
   const ms=stepRemain??estStep(cur)*1000/speedF;stepRemain=ms;stepStart=performance.now();
   stepT=setTimeout(()=>{stepStart=0;if(playing)next();},ms);
 }
+function audioFail(tok){if(tok!==speakTok||audioBad)return;audioBad=true;toast('Le son n’a pas pu démarrer : lecture sans voix. Touchez « Voix » pour réessayer.');stepRemain=null;refreshSub();if(playing)runStep();}
+function narrateAudio(from){
+  const tok=++speakTok,ss=sentences(NARR[cur]),step=cur;let i=from||0;
+  try{if(synth)synth.cancel();}catch(e){}
+  const say=()=>{
+    if(tok!==speakTok)return;
+    if(i>=ss.length){sentIdx=ss.length;stepT=setTimeout(()=>{if(tok===speakTok&&playing)next();},OUTRO*1000/speedF);return;}
+    const k=i++;
+    A.onplaying=()=>{if(tok!==speakTok)return;A.onplaying=null;sentIdx=k;showSub(ss[k]);hlText(ss[k]);triggerCallouts(k);};
+    A.onended=()=>{if(tok!==speakTok)return;say();};
+    A.onerror=()=>{if(tok!==speakTok)return;audioFail(tok);};
+    A.src=AUD[step][k];A.defaultPlaybackRate=A.playbackRate=speedF;
+    const pr=A.play();if(pr&&pr.catch)pr.catch(e=>{if(tok!==speakTok||(e&&e.name==='AbortError'))return;audioFail(tok);});
+  };
+  stepT=setTimeout(say,from?250:INTRO*1000/speedF);
+}
 function narrate(from){
+  if(HAVEAUD){narrateAudio(from);return;}
   const tok=++speakTok,ss=sentences(NARR[cur]);let i=from||0;synth.cancel();
   const say=()=>{
     if(tok!==speakTok)return;
@@ -1414,16 +1436,16 @@ function setPlay(v){
   if(v&&finalOn)v=false;
   playing=v;const b=$('play');b.setAttribute('aria-pressed',v);b.textContent=v?'❚❚':'▶';b.setAttribute('aria-label',v?'Pause':'Lecture');b.title=v?'Pause (espace)':'Lecture (espace)';
   if(v){
-    if(voiceOn&&!synth)toast('Ce navigateur ne propose pas de synthèse vocale : lecture sans voix.');
+    if(voiceOn&&!HAVEAUD&&!synth)toast('Ce navigateur ne propose pas de synthèse vocale : lecture sans voix.');
     if(canSpeak()){callTimers.forEach(clearTimeout);callTimers=[];}
     runStep();
   }else hold();
   refreshSub();
 }
 function setVoice(on){
-  if(on&&!synth){toast('Ce navigateur ne propose pas de synthèse vocale.');on=false;}
-  if(on)speechBad=false;
-  hold();voiceOn=on;$('vbtn').setAttribute('aria-pressed',on);$('vsel').hidden=!on||!vlist.length;
+  if(on&&!HAVEAUD&&!synth){toast('Ce navigateur ne propose pas de synthèse vocale.');on=false;}
+  if(on){speechBad=false;audioBad=false;}
+  hold();voiceOn=on;$('vbtn').setAttribute('aria-pressed',on);$('vsel').hidden=!on||!vlist.length||HAVEAUD;
   refreshSub();
   stepRemain=null;
   if(playing)runStep();
