@@ -753,7 +753,7 @@ let sbox=[-20,-70,920,900],vb=[0,0,900,1100], anim=null, zoomL=1, showG=true, GH
 const EVER={}, ROUTES={}, DIM={};
 function effScale(svg,w,h){const r=svg.getBoundingClientRect();return Math.min(r.width/w,r.height/h)||1;}
 function kFactor(){const w=mapwrap.clientWidth;return (w<600?0.8:w>1700?1.2:1)*zoomL;}
-const padCam=c=>{const port=innerHeight>innerWidth;return port?[c[0],c[1]-c[3]*.25,c[2],c[3]*2.3]:[c[0]-c[2]*.05,c[1]-c[3]*.1,c[2]*1.1,c[3]*1.5];};
+const padCam=c=>{const port=innerHeight>innerWidth;return port?[c[0]-c[2]*.1,c[1]-c[3]*.25,c[2]*1.55,c[3]*2.3]:[c[0]-c[2]*.05,c[1]-c[3]*.1,c[2]*1.1,c[3]*1.5];};
 function unitScale(w,h){return kFactor()/effScale(tac,w,h);}
 function applyFrame(box,s,pos){
   tac.setAttribute('viewBox',box.join(' '));
