@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>Garigliano, mai 1944</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
+<style>
+:root{
+  --land:#ECEDE8; --sea:#CFDCE3; --water:#8FB0C4; --marsh:#B4C6CF; --road:#FFFFFF; --roadc:#CBCAC1;
+  --contour:#CDC3B1; --grid:transparent; --hedge:transparent; --town:#56615B; --woodf:#DDE4D3; --woodl:#9FB08A; --urban:#D6D2CA;
+  --ink:#141B18; --muted:#66706A; --line:#D9DBD4; --sheet:#FFFFFF; --halo:#ECEDE8; --track:rgb(20 27 24 / .16);
+  --us:#1F5FD6; --on-us:#FFFFFF; --us-bg:#E4ECFB; --de:#D0342C; --de-bg:#FBE4E2; --air:#F0A500; --air-soft:#FFF4D6;
+  --veil:rgb(236 237 232 / .94); --veil0:rgb(236 237 232 / 0); --hover:rgb(20 27 24 / .07);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --land:#151A1D; --sea:#0F1B24; --water:#3D6178; --marsh:#223540; --road:#2F373C; --roadc:#0E1215;
+  --contour:#2B302F; --town:#B6BFBA; --woodf:#1A231F; --woodl:#2F3E34; --urban:#262B2D;
+  --ink:#EEF1EE; --muted:#98A29D; --line:#2A3236; --sheet:#1B2226; --halo:#151A1D; --track:rgb(238 241 238 / .18);
+  --us:#6FA0FF; --on-us:#0B1220; --us-bg:#15233A; --de:#FF6B5E; --de-bg:#3A1714; --air:#FFC23A; --air-soft:#3A3019;
+  --veil:rgb(21 26 29 / .94); --veil0:rgb(21 26 29 / 0); --hover:rgb(238 241 238 / .08); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --land:#151A1D; --sea:#0F1B24; --water:#3D6178; --marsh:#223540; --road:#2F373C; --roadc:#0E1215;
+  --contour:#2B302F; --town:#B6BFBA; --woodf:#1A231F; --woodl:#2F3E34; --urban:#262B2D;
+  --ink:#EEF1EE; --muted:#98A29D; --line:#2A3236; --sheet:#1B2226; --halo:#151A1D; --track:rgb(238 241 238 / .18);
+  --us:#6FA0FF; --on-us:#0B1220; --us-bg:#15233A; --de:#FF6B5E; --de-bg:#3A1714; --air:#FFC23A; --air-soft:#3A3019;
+  --veil:rgb(21 26 29 / .94); --veil0:rgb(21 26 29 / 0); --hover:rgb(238 241 238 / .08); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--land);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+.app{position:fixed;inset:0}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid var(--us);outline-offset:2px}
+
+/* carte */
+.mapwrap{position:absolute;inset:0;background:var(--land);overflow:hidden}
+#tacsvg,#stratsvg{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .8s}
+#stratsvg{opacity:0;pointer-events:none}
+canvas#pen{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.penon canvas#pen{pointer-events:auto;cursor:crosshair}
+#bocage path,.gridl{display:none}
+.sea{fill:var(--sea)} .coast{fill:none;stroke:var(--water);stroke-width:1}
+.river{fill:none;stroke:var(--water);stroke-width:2;stroke-linecap:round}
+.roadc{fill:none;stroke:var(--roadc);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.road{fill:none;stroke:var(--road);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.contour{fill:none;stroke:var(--contour);stroke-width:.8;opacity:.8} .hillshade{fill:var(--contour);opacity:.18}
+.wood{fill:var(--woodf);stroke:none} .urban{fill:var(--urban)}
+.rail{fill:none;stroke:var(--muted);stroke-width:1.6;opacity:.45} .railt{display:none}
+.front{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-dasharray:8 4 2 4;opacity:.55}
+.box{fill:url(#hatch);stroke:var(--air);stroke-width:2;stroke-dasharray:7 4}
+.box.pulse{animation:pulse 2.2s ease-in-out infinite} @keyframes pulse{50%{opacity:.45}}
+.place circle{fill:var(--town)}
+.place text,.rlab,.maplab,.dlab,.mgt,.alab,.ann text,.unit text{font-family:var(--font);paint-order:stroke;stroke:var(--halo);stroke-linejoin:round}
+.place text{font-size:14px;fill:var(--town);stroke-width:3.5px;font-weight:600}
+.place.key text{font-size:16.5px;font-weight:750;fill:var(--ink)} .place.key circle{fill:var(--ink)}
+.place.gone{display:none} .minor-off .place.minor:not(.cited){display:none} .place.dim text{opacity:.12}
+.rlab{font-size:11.5px;font-style:italic;fill:var(--water);stroke-width:3px}
+.maplab{font-size:13px;fill:var(--muted);stroke-width:3px;letter-spacing:.12em}
+.seal{font-family:var(--font);font-style:italic;fill:var(--water);font-size:17px;letter-spacing:.25em;opacity:.8}
+.unit{transition:opacity .6s;cursor:pointer}
+.unit .frame{stroke-width:2.2}
+.unit.U .frame,.unit.B .frame{fill:var(--us-bg);stroke:var(--us)} .unit.U .ic,.unit.B .ic{stroke:var(--us);fill:none;stroke-width:1.7}
+.unit.C .frame{fill:var(--de-bg);stroke:var(--de)} .unit.C .ic{stroke:var(--de);fill:none;stroke-width:1.7}
+.unit text{font-weight:700;stroke-width:3.5px}
+.unit .ulab{font-size:14.5px} .unit .ech{font-size:9.5px;text-anchor:middle}
+.unit.U text,.unit.B text{fill:var(--us)} .unit.C text{fill:var(--de)}
+.tank,.plane{pointer-events:none} .plane{opacity:0} .plane.on{opacity:1}
+.unit.broken .frame{stroke-dasharray:4 2.5;fill-opacity:.4}
+.unit.dimmed{opacity:.55}
+.unit .halo{fill:var(--air);opacity:0;pointer-events:none} .unit.hl{opacity:1!important} .unit.hl .halo{animation:halo 1.1s ease-in-out 3}
+@keyframes halo{0%,100%{opacity:0}50%{opacity:.55}}
+.call.out{opacity:0;transition:opacity .45s} .cg{transition:opacity .45s} .cg.out{opacity:0}
+.unit.gone{opacity:0;pointer-events:none}
+.ghost{display:none}
+.trail{fill:none;stroke-width:1.6;stroke-dasharray:1 5;stroke-linecap:round;opacity:.35}
+.trail.U{stroke:var(--us)} .trail.C{stroke:var(--de)}
+.arrow{fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
+.arrow.U{stroke:var(--us)} .arrow.C{stroke:var(--de)} .arrow.A{stroke:var(--air)}
+.draw{animation:draw 1.4s ease-out both} @keyframes draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+.fade{animation:fade .8s ease-out both} @keyframes fade{from{opacity:0}to{opacity:1}}
+.zone{fill:var(--air);fill-opacity:.16;stroke:var(--air);stroke-dasharray:6 4}
+.ann text{font-weight:600;fill:var(--ink);stroke-width:4px} .ann .pin{fill:var(--air);stroke:var(--ink);stroke-width:1}
+.alab{font-weight:700} .alab.U{fill:var(--us)} .alab.C{fill:var(--de)} .alab.A{fill:#9A6A00}
+.mg{fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round;opacity:.85} .mg.U{stroke:var(--us)} .mgf{fill:var(--us)} .mg.C{stroke:var(--de)} .mgf.C{fill:var(--de)}
+.mgt{font-weight:700;fill:var(--ink)} .mgt.U{fill:var(--us)} .mgt.C{fill:var(--de)}
+.dfront{fill:none;stroke:var(--de);stroke-width:2.4;stroke-linecap:round;transition:opacity .5s}
+.dfront.d27{stroke-dasharray:12 6}.dfront.d28{stroke-dasharray:6 4}.dfront.d29{stroke-dasharray:1 5}
+.dfront.old{opacity:.14} .dfront.old+.dlab{display:none}
+.dlab{font-weight:700;fill:var(--de)}
+.pen{fill:var(--de);fill-opacity:.08;stroke:var(--de);stroke-opacity:.3;stroke-width:1;stroke-dasharray:4 3}
+.inf25{fill:none;stroke:var(--us);stroke-width:2;opacity:.5}
+.crater{fill:var(--ink);opacity:.3}
+.imp{animation:imp .35s ease-out both} @keyframes imp{from{opacity:0}}
+.ring{fill:none;stroke:var(--air);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center;animation:ring .9s ease-out both}
+@keyframes ring{0%{transform:scale(.2);opacity:1}100%{transform:scale(2.4);opacity:0}}
+.smoke{fill:var(--muted);filter:url(#smoke);opacity:0;animation:smoke 7s ease-out forwards}
+@keyframes smoke{0%{opacity:0;transform:translate(0,0)}30%{opacity:.45}100%{opacity:.32;transform:translate(-4px,-34px)}}
+.wreck{stroke:var(--de);stroke-width:1.6;fill:none}
+.still .draw,.still .fade,.still .imp,.still .pulse{animation:none!important}
+.tank .hull{fill:var(--us);stroke:var(--halo);stroke-width:1.2} .tank.C .hull{fill:var(--de)}
+.tank .tur{fill:var(--us-bg);stroke:var(--us);stroke-width:1.1} .tank.C .tur{fill:var(--de-bg);stroke:var(--de)}
+.tank .gun{stroke:var(--us);stroke-width:1.8;stroke-linecap:round} .tank.C .gun{stroke:var(--de)}
+.tank{opacity:0;transition:opacity .4s} .tank.on{opacity:1}
+.plane .body{fill:var(--ink);stroke:var(--halo);stroke-width:1.1} .plane .shad{fill:var(--ink);opacity:.14}
+.still .ring{display:none} .still .smoke{animation:none;opacity:.32;transform:translate(-4px,-34px)}
+
+/* voiles de lisibilité */
+.veil-top{position:absolute;left:0;right:0;top:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(var(--veil),var(--veil0))}
+.veil-bot{position:absolute;left:0;right:0;bottom:0;height:40vh;z-index:4;pointer-events:none;background:linear-gradient(to top,var(--veil) 0%,var(--veil) 36%,var(--veil0) 100%)}
+
+/* progression par actes */
+.progress{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;gap:10px;padding:calc(14px + env(safe-area-inset-top,0px)) clamp(16px,3vw,48px) 0}
+.seg{display:flex;flex-direction:column;gap:4px;min-width:0}
+.seglab{font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.on .seglab{color:var(--ink)}
+.ticks{display:flex;gap:3px}
+.tick{flex:1;height:16px;padding:0;border:0;background:transparent;position:relative}
+.tick::after{content:"";position:absolute;left:0;right:0;top:6px;height:4px;border-radius:2px;background:var(--track);transition:background .3s}
+.tick.done::after{background:var(--muted)} .tick.on::after{background:var(--us)}
+.tick:hover::after{background:var(--ink)}
+@media (pointer:coarse){.tick{height:34px}.tick::after{top:15px}}
+.mapmeta{position:absolute;right:calc(clamp(16px,3vw,48px) + 118px);top:62px;z-index:5;display:flex;align-items:center;gap:14px;color:var(--muted);font-size:12.5px}
+.north{width:16px;height:26px;color:var(--muted)}
+.scale{display:flex;flex-direction:column;gap:3px}
+.scale .bar{height:5px;border:1.2px solid var(--muted);border-top:0}
+
+/* récit */
+.story{position:absolute;left:clamp(16px,3vw,48px);bottom:clamp(84px,10vh,120px);z-index:5;width:min(980px,62vw)}
+.story.enter{animation:storyIn .7s ease-out both}
+@keyframes storyIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.kicker{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;font-weight:600;color:var(--muted)}
+.kicker #act{color:var(--us)}
+.story h1{font-size:clamp(38px,3.9vw,68px);line-height:1.03;font-weight:780;letter-spacing:-.022em;margin:.2em 0 .34em;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:baseline;gap:8px;font-size:clamp(16px,1.15vw,20px);font-weight:700;padding:7px 15px;border-radius:999px;background:var(--us);color:var(--on-us)}
+.chip small{font-size:.72em;font-weight:600;opacity:.85}
+.chip.f{background:var(--sheet);color:var(--us);box-shadow:inset 0 0 0 2px var(--us)}
+.chip.c{background:var(--air-soft);color:var(--ink);box-shadow:inset 0 0 0 2px var(--air)}
+.story .sub{font-size:clamp(18px,1.3vw,22px);line-height:1.45;margin:14px 0 0;max-width:62ch;text-wrap:pretty;background:var(--sheet);border-radius:10px;padding:8px 14px;box-shadow:0 6px 20px rgb(0 0 0 / .1);max-height:30vh;overflow:auto}
+.story .sub[hidden],.story .sub:empty{display:none}
+.toast{position:absolute;left:50%;top:84px;transform:translateX(-50%);z-index:9;background:var(--ink);color:var(--sheet);border-radius:10px;padding:10px 16px;font-size:15px;font-weight:600}
+.toast[hidden]{display:none}
+.big{position:absolute;right:clamp(16px,3vw,48px);bottom:clamp(84px,10vh,120px);z-index:5;text-align:right;max-width:40vw;opacity:0}
+.big.show{animation:fade .8s 2.8s ease-out both}
+.big b{display:block;white-space:nowrap;font-size:clamp(56px,5.6vw,96px);font-weight:800;letter-spacing:-.035em;line-height:.9;font-variant-numeric:tabular-nums}
+.big span{display:block;font-size:16px;line-height:1.35;color:var(--muted);margin-top:8px}
+
+/* légende */
+.legend{position:absolute;right:clamp(16px,3vw,48px);top:58px;z-index:5;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.pill{border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:600;min-height:34px}
+.pill:hover{background:var(--hover)}
+.legbody{background:var(--sheet);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:7px;font-size:15px;box-shadow:0 8px 30px rgb(0 0 0 / .12)}
+.legbody[hidden]{display:none}
+.legbody span{display:flex;align-items:center;gap:9px}
+.legbody svg{width:24px;height:18px;flex:none}
+
+/* commandes */
+.controls{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;gap:2px;align-items:center;background:var(--sheet);border-radius:999px;padding:6px 8px;box-shadow:0 10px 34px rgb(0 0 0 / .16);opacity:0;transform:translate(-50%,10px);transition:opacity .3s,transform .3s;pointer-events:none}
+.ui .controls,.controls:focus-within{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.controls button{flex:none;white-space:nowrap;border:0;background:transparent;border-radius:999px;min-width:40px;height:40px;padding:0 12px;font-size:14.5px;font-weight:600}
+.controls button:hover{background:var(--hover)}
+.controls button[aria-pressed="true"]{background:var(--us);color:var(--on-us)}
+.controls .sep{width:1px;height:22px;background:var(--line);margin:0 6px}
+.controls select{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:6px;border-radius:8px}
+.controls #total{font-size:12.5px;color:var(--muted);padding-right:8px;white-space:nowrap}
+
+/* question, acte, volet, écran final */
+.qov{position:absolute;inset:0;z-index:8;display:grid;place-items:center;background:rgb(10 14 16 / .6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:24px}
+.qov[hidden]{display:none}
+.qov div{max-width:min(1150px,86vw);color:#fff;text-align:center}
+.qov span{font-size:15px;font-weight:600;opacity:.75}
+.qov p{max-width:26ch;margin-left:auto!important;margin-right:auto!important;font-size:clamp(30px,3.4vw,58px);line-height:1.18;font-weight:650;letter-spacing:-.015em;margin:.35em 0 0}
+.actcard{position:absolute;inset:0;z-index:7;display:grid;place-content:center;text-align:center;pointer-events:none;opacity:0;background:var(--veil)}
+.actcard.show{animation:actIn 2.2s ease both}
+@keyframes actIn{0%{opacity:0}15%{opacity:1}72%{opacity:1}100%{opacity:0}}
+.actcard span{font-size:16px;font-weight:600;color:var(--us)}
+.actcard b{display:block;font-size:clamp(44px,6vw,88px);font-weight:800;letter-spacing:-.03em;margin-top:6px}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(470px,94vw);z-index:9;background:var(--sheet);box-shadow:-24px 0 60px rgb(0 0 0 / .16);padding:26px 28px;overflow:auto;display:flex;flex-direction:column;gap:14px;animation:slide .35s ease-out both}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+.drawer[hidden]{display:none}
+.drawer .close{align-self:flex-end;border:0;background:var(--hover);border-radius:999px;width:36px;height:36px;font-size:18px}
+.drawer .dwhen{font-size:13.5px;font-weight:600;color:var(--muted)}
+.drawer h2{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.015em}
+.drawer p{font-size:16.5px;line-height:1.6;margin:0}
+.drawer .lbl{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:6px;display:block}
+.crit{display:flex;flex-wrap:wrap;gap:6px}
+.crit span{font-size:13.5px;background:var(--hover);border-radius:999px;padding:5px 11px}
+.dfact{border-left:3px solid var(--us);padding-left:12px}
+.drawer .dtxt{font-size:15.5px;line-height:1.6;color:var(--ink)}
+.crit span.p{background:var(--us);color:var(--on-us)} .crit span.f{box-shadow:inset 0 0 0 1.5px var(--us);background:none;color:var(--us)} .crit span.c{background:var(--air-soft)}
+.src{font-size:13px!important;color:var(--muted)}
+.final{position:absolute;inset:0;z-index:5;background:var(--sheet);overflow:auto;padding:clamp(70px,10vh,110px) clamp(20px,7vw,140px) 120px}
+.final[hidden]{display:none}
+.final .kick{font-size:15px;font-weight:600;color:var(--us)}
+.final h2{font-size:clamp(38px,4vw,64px);letter-spacing:-.03em;margin:.15em 0 .8em;line-height:1}
+.lessons{display:grid;grid-template-columns:minmax(170px,.5fr) 1fr 1fr 1fr;gap:0 32px;font-size:clamp(17px,1.2vw,20px);line-height:1.45}
+.lessons>div{padding:14px 0;border-top:1px solid var(--line)}
+.lessons .h{font-size:13px;font-weight:700;color:var(--muted);border-top:0;padding-bottom:6px}
+.lessons .lv{font-size:14px;font-weight:700;color:var(--muted)}
+.lessons .now{font-weight:600}
+.lessons .pr{font-size:15px;font-weight:650;color:var(--us)}
+.synth{font-size:clamp(18px,1.3vw,22px);line-height:1.55;max-width:72ch;margin:0 0 22px}
+.plist{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;align-items:center}
+.plist b{font-size:14px;color:var(--muted);margin-right:4px}
+.plist span.p{background:var(--us);color:var(--on-us)} .plist span.f{background:none;box-shadow:inset 0 0 0 1.5px var(--us);color:var(--us)} .plist span.c{background:var(--air-soft)}
+.plist:last-of-type{margin-bottom:36px}
+.lessons .pr small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-top:3px}
+.plist span{background:var(--hover);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:600}
+.plist i{font-style:normal;font-weight:500;color:var(--muted);margin-left:4px}
+.callsvg{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+.callouts{position:absolute;inset:0;z-index:5;pointer-events:none}
+.call{position:absolute;max-width:320px;background:var(--sheet);border-radius:12px;padding:10px 13px 11px;box-shadow:0 10px 30px rgb(0 0 0 / .16);animation:callIn .45s ease-out both}
+@keyframes callIn{from{opacity:0;transform:translateY(6px)}}
+.call .cp{display:inline-block;font-size:13px;font-weight:700;color:var(--us);background:var(--us-bg);border-radius:999px;padding:2px 8px;margin-bottom:6px}
+.call b{display:block;font-size:19px;line-height:1.2}
+.call p{margin:4px 0 0;font-size:15.5px;line-height:1.35;color:var(--muted)}
+.cline{stroke:var(--ink);stroke-width:1.2;opacity:.55}
+.cdot{fill:var(--air);stroke:var(--ink);stroke-width:1.2}
+.finalon .callouts,.finalon .callsvg,
+.finalon .story,.finalon .big,.finalon .legend,.finalon .mapmeta{display:none}
+.tip{position:absolute;z-index:6;max-width:300px;background:var(--sheet);border-radius:10px;padding:9px 12px 10px;font-size:13.5px;line-height:1.35;display:flex;flex-direction:column;gap:2px;pointer-events:none;box-shadow:0 10px 30px rgb(0 0 0 / .18)}
+.tip[hidden]{display:none} .tip b{font-size:15px} .tip span{color:var(--muted)} .tip .chief{color:var(--ink);font-weight:600}
+@media (prefers-reduced-motion: reduce){.draw,.fade,.pulse,.unit,.imp,.story.enter,.big.show,.actcard.show,#tacsvg,#stratsvg{animation:none!important;transition:none!important}.big.show{opacity:1}.ring{display:none}.smoke{animation:none;opacity:.32}}
+@media (max-width:820px){
+  .story{width:auto;right:16px;bottom:84px} .big,.legend,.mapmeta,.seglab{display:none}
+  .story h1{font-size:30px} .story p{font-size:16.5px} .story .sub{font-size:15px;max-height:24vh} .chip{font-size:13px;padding:4px 10px}
+  .controls{max-width:calc(100% - 16px);overflow-x:auto} .controls #total,.controls select{display:none}
+  .veil-bot{height:62vh}
+  .story{bottom:calc(76px + env(safe-area-inset-bottom,0px))} .story .more{margin-top:6px}
+  .kicker{font-size:12.5px} .progress{gap:4px;padding-left:10px;padding-right:10px}
+  .controls{left:8px;right:8px;transform:translateY(10px);justify-content:flex-start}
+  .ui .controls,.controls:focus-within{transform:none}
+  .controls button{min-width:38px;padding:0 9px;font-size:13.5px}
+  .call{max-width:200px;padding:8px 10px} .call b{font-size:14px} .call p{font-size:12.5px}
+  .qov p{font-size:26px}
+  #fs,.controls .sep{display:none}
+  .lessons{grid-template-columns:1fr;gap:0} .lessons .h{display:none} .lessons>div{border-top:0;padding:4px 0} .lessons .lv{border-top:1px solid var(--line);padding-top:14px}
+}
+@media (max-width:820px) and (orientation:portrait){.story h1{font-size:26px}.story p{font-size:15.5px}}
+
+/* iPhone et iPad : zones sûres, gestes, pas de zoom automatique sur les champs */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,select,.tick{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mapwrap{touch-action:pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.penon canvas#pen{touch-action:none}
+.progress{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.story{margin-left:env(safe-area-inset-left,0px)} .legend{margin-right:env(safe-area-inset-right,0px)}
+.no-fs #fs{display:none!important}
+@supports (-webkit-touch-callout:none){select{font-size:16px!important}}
+@media (max-height:520px) and (orientation:landscape){
+ .story{bottom:calc(64px + env(safe-area-inset-bottom,0px));max-width:55vw;width:auto}
+ .story h1{font-size:20px;margin:.1em 0 .2em}.story .chips{display:none}.story .sub{max-height:14vh;font-size:13px}
+ .big,.mapmeta{display:none}.call{max-width:280px}.call b{font-size:13px}.call p{font-size:11.5px}
+ .controls{bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+}
+.lessons .ask{font-style:italic;color:var(--muted)}
+.finalon .progress{background:var(--sheet)}
+.tick.skip::after{opacity:.35}
+.final .again{margin:28px 0 0;border:0;background:var(--us);color:var(--on-us);border-radius:999px;padding:12px 22px;font-size:16px;font-weight:700}
+.final h3{font-size:22px;margin:40px 0 10px}
+.final .lim,.qz{max-width:72ch;font-size:16.5px;line-height:1.55}
+.qz details{border-top:1px solid var(--line);padding:10px 0}
+.qz summary{cursor:pointer;font-weight:650}
+.qz details p{margin:8px 0 0;color:var(--muted)}
+.legnote{font-size:12.5px;line-height:1.35;color:var(--muted);max-width:32ch;margin-top:2px}
+@media (hover:none){.controls{opacity:1;pointer-events:auto;transform:translate(-50%,0)}}
+@media (hover:none) and (max-width:820px){.controls{transform:none}}
+</style>
+</head>
+<body>
+<div id="nojs" style="position:fixed;inset:0;z-index:99;display:grid;place-items:center;padding:24px;background:#ECEDE8;color:#141B18;font:17px/1.5 -apple-system,system-ui,sans-serif;text-align:center"><div style="max-width:30em"><b style="font-size:22px">Garigliano, mai 1944</b><p>La présentation n’a pas pu démarrer : ce visualiseur n’exécute pas ses scripts. C’est le cas de l’aperçu de fichiers de l’app Claude et de l’app Fichiers sur iPhone.</p><p><b>Ouvrez plutôt le lien de la présentation dans Safari</b>, ou ce fichier dans une app capable d’afficher des pages web.</p><p class="err" style="font-size:13px;color:#8A3B2E"></p></div></div>
+<script>window.addEventListener('error',function(e){var n=document.getElementById('nojs');if(n){n.querySelector('.err').textContent='Détail technique : '+e.message+' (ligne '+e.lineno+')';}});</script>
+<div class="app" id="app">
+  <div class="mapwrap" id="mapwrap">
+      <svg id="tacsvg" viewBox="0 0 900 1100" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Carte animée de la bataille du Garigliano, mai 1944">
+        <defs>
+          <pattern id="bocage" width="18" height="18" patternUnits="userSpaceOnUse">
+            <path d="M0,6 L10,5 L18,7 M7,0 L6,6 M6,5 L7,18 M13,5 L14,18 M0,13 L7,14 M14,11 L18,12" style="fill:none;stroke:var(--hedge);stroke-width:.7"/>
+          </pattern>
+          <pattern id="marsh" width="14" height="8" patternUnits="userSpaceOnUse">
+            <path d="M1,3 H6 M8,7 H13" style="stroke:var(--marsh);stroke-width:1"/>
+          </pattern>
+          <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+            <path d="M0,0 V7" style="stroke:var(--air);stroke-width:2.2;opacity:.55"/>
+          </pattern>
+          <filter id="smoke" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
+          <filter id="grease" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="1" seed="4" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <marker id="mU" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.4" markerHeight="3.4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--us)"/></marker>
+          <marker id="mC" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.4" markerHeight="3.4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--de)"/></marker>
+          <marker id="mA" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.4" markerHeight="3.4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--air)"/></marker>
+        </defs>
+        <g id="tbase"></g>
+        <g id="tpen"></g>
+        <g id="tfront"></g>
+        <g id="tover"></g>
+        <g id="tfx"></g>
+        <g id="tg"></g>
+        <g id="ttrail"></g>
+        <g id="tunits"></g>
+        <g id="tplaces"></g>
+        <g id="tarrows"></g>
+        <g id="tann"></g>
+        <g id="thandles"></g>
+        <g id="tair"></g>
+      </svg>
+      <svg id="stratsvg" viewBox="0 0 880 634" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Carte du théâtre, Italie centrale">
+        <g id="sbase"></g>
+        <g id="sover"></g>
+        <g id="sann"></g>
+      </svg>
+      <canvas id="pen"></canvas>
+  </div>
+  <div class="veil-top"></div><div class="veil-bot"></div>
+  <nav class="progress" id="progress" aria-label="Actes et étapes"></nav>
+  <div class="mapmeta" aria-hidden="true">
+    <svg class="north" viewBox="0 0 16 26"><path d="M8,1 L14,17 L8,13.5 L2,17 Z" fill="currentColor"/><text x="8" y="25.5" text-anchor="middle" style="font:700 8px Inter,sans-serif;fill:currentColor">N</text></svg>
+    <div class="scale"><div class="bar" id="sbar"></div><span id="stxt"></span></div>
+  </div>
+  <div class="legend"><button class="pill" id="legbtn" aria-expanded="false">Légende</button><div class="legbody" id="legbody" hidden></div></div>
+  <section class="story" id="story" aria-live="polite">
+    <div class="kicker"><span id="act"></span><span id="when"></span></div>
+    <h1 id="title"></h1>
+    <div class="chips" id="chips"></div>
+    <p class="sub" id="narr" hidden></p>
+  </section>
+  <svg class="callsvg" id="callsvg" aria-hidden="true"></svg><div class="callouts" id="callouts" aria-live="polite"></div>
+  <div class="big" id="big" aria-hidden="true"><b id="bigv"></b><span id="bigl"></span></div>
+  <div class="actcard" id="actcard" aria-hidden="true"><span id="actn"></span><b id="actt"></b></div>
+  <div class="qov" id="qov" hidden role="dialog" aria-modal="true" aria-label="Question à la salle"><div><span>Question à la salle</span><p id="q"></p></div></div>
+  <aside class="drawer" id="drawer" hidden role="dialog" aria-label="Pour aller plus loin">
+    <button class="close" id="dclose" aria-label="Fermer">✕</button>
+    <div class="dwhen" id="dwhen"></div>
+    <h2 id="dtitle"></h2>
+    <div><span class="lbl">Principes et facteurs</span><div class="crit" id="tags"></div></div>
+    <div class="dfact"><span class="lbl">Repère</span><p id="dfact"></p></div>
+    <div><span class="lbl">Question à la salle</span><p id="dq"></p></div>
+    <div><span class="lbl">Piste de réponse</span><p id="dans"></p></div>
+    <div><span class="lbl">Texte lu</span><p class="dtxt" id="dnarr"></p></div>
+    <p class="src">Repères recoupés sur plusieurs sources en ligne (ministère des Armées, Musée de l’Armée, associations d’anciens combattants, historiographie italienne) ; chiffres à confronter aux ouvrages de référence sur le corps expéditionnaire français en Italie. Grille : principes de la guerre (Foch, doctrine française) et facteurs de supériorité opérationnelle (<i>Action terrestre future</i>, 2016). Positions des unités et des sommets indicatives, graphiques de manœuvre en convention APP-6 actuelle appliquée à 1944.</p>
+  </aside>
+  <section class="final" id="final" hidden>
+    <div class="kick">Synthèse</div>
+    <h2>Ce que le Garigliano nous dit aujourd’hui</h2>
+    <p class="synth">Le corps expéditionnaire apporte une contribution décisive à la victoire de Diadem parce que son chef choisit l’effort principal là où l’ennemi ne l’attend pas, avec des troupes faites pour ce terrain, et parce qu’il relance après l’échec du premier jour puis exploite sans délai. La victoire est aussi celle d’une coalition, où chacun fixe pendant qu’un autre perce. Elle a sa face sombre : les crimes commis contre les civils de Ciociaria rappellent que la discipline fait partie de la valeur d’une troupe.</p>
+    <div class="plist" id="pl1"></div><div class="plist" id="pl2"></div><div class="plist" id="pl3"></div>
+    <div class="lessons" id="lessons"></div>
+    <h3>Pour vérifier</h3><div class="qz" id="qz"></div>
+    <h3>Limites de ce récit</h3>
+    <p class="lim">Le récit suit surtout la contribution du corps expéditionnaire français ; Diadem est une victoire de coalition, où les armées britannique, polonaise, canadienne et américaine ont joué un rôle central. Sur l’ensemble de la campagne d’Italie (huit mois), les chiffres couramment cités sont d’environ 4 200 tués et 30 000 blessés pour le corps expéditionnaire ; les pertes de Diadem seule, celles des autres armées alliées et des Allemands, et le rapport de forces ne sont pas détaillés ici et sont à chercher dans les ouvrages de référence. Positions des unités indicatives.</p>
+    <button class="again" id="again">↺ Recommencer</button>
+  </section>
+  <div class="toast" id="toast" hidden></div>
+  <div class="controls" id="controls">
+    <button id="prevb" aria-label="Étape précédente" title="Précédent (←)">←</button>
+    <button id="play" aria-label="Lecture" aria-pressed="false" title="Lecture automatique (P)">▶</button>
+    <button id="nextb" aria-label="Étape suivante" title="Suivant (→)">→</button>
+    <button id="vbtn" aria-pressed="true" title="Couper ou rétablir la voix (V)">Voix</button>
+    <select id="vsel" aria-label="Choix de la voix" hidden></select>
+    <select id="speed" aria-label="Vitesse de lecture et de la voix"><option value="0.85">Vitesse 0,85×</option><option value="1" selected>Vitesse 1×</option><option value="1.15">Vitesse 1,15×</option><option value="1.3">Vitesse 1,3×</option><option value="1.5">Vitesse 1,5×</option></select>
+    <span id="total"></span>
+    <span class="sep"></span>
+    <button id="shortb" aria-pressed="false" title="Parcours court : 8 étapes essentielles">Parcours court</button>
+    <button id="sbtn" aria-pressed="true" title="Sous-titres (S)">Sous-titres</button>
+    <button id="qbtn" aria-pressed="false" title="Question à la salle (Q)">Question</button>
+    <button id="ibtn" aria-pressed="false" title="Pour aller plus loin (I)">Détails</button>
+    <button id="penbtn" aria-pressed="false" title="Annoter (D)">Annoter</button>
+    <button id="clear" title="Effacer les annotations">Effacer</button>
+    <button id="fs" title="Plein écran (F)">Plein écran</button>
+  </div>
+</div>
+<script>
+
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+const NSS={'vector-effect':'non-scaling-stroke'};
+
+/* ================= CONFIGURATION DE LA BATAILLE ================= */
+/* Camps : U = ami (bleu), B = ami d'une autre nation (bleu), C = ennemi (rouge).
+   Chaque unité peut préciser sa nation (5e champ de UD, champ nat des unités de théâtre) ;
+   sinon la nation par défaut de son camp s'applique. Nations disponibles : voir FLAGS. */
+const CFG={
+  sideNation:{U:'fr',B:'us',C:'de'},
+  ami:'Unité alliée', eni:'Unité allemande',
+  mvtAmi:'Mouvement allié', mvtEni:'Mouvement allemand', avions:'Avions (symboliques)',
+  front:'Front allemand', ligneContact:'Ligne de contact',
+  kmTac:10, kmStrat:2,  /* unités de carte par kilomètre */
+  voixKey:'garigliano44-voix',
+  villesToujours:['Castelforte','Monte Majo','Ausonia','Esperia','Pico','Cassino','Minturno'], /* localités toujours affichées */
+  alias:[[/Faito/g,'Monte Faito'],[/Majo/g,'Monte Majo'],[/Petrella/g,'Monte Petrella'],[/Revole/g,'Monte Revole'],[/Monte d'Oro/g,'Monte d’Oro'],[/Mont-Cassin/g,'Cassino']],
+  /* effets : BOX (zone battue par l'artillerie le 11 mai), ligne des positions allemandes */
+  fxLigne:[[300,334],[372,300]],
+  fxRoutes:[],
+  fxPonts:[]
+};
+
+/* ================= [DONNÉES] CARTE TACTIQUE (1 km ≈ 10 unités) =================
+   Projection : x = (longitude − 13,40) × 835 ; y = (41,62 − latitude) × 1 110 */
+const tbase=$('tbase');
+el('rect',{x:-900,y:-300,width:2700,height:1800,style:'fill:var(--land)'},tbase);
+el('rect',{x:-900,y:-300,width:2700,height:1800,style:'fill:url(#bocage);opacity:.7'},tbase);
+// relief : monts Aurunci, massif du Majo, monts Ausoni, Monte Cairo
+[[215,330,120,55],[215,330,70,30],[325,318,40,26],[325,318,20,12],[60,240,110,50],[400,90,60,30]].forEach(([cx,cy,rx,ry],i)=>{
+  if(i%2===0) el('ellipse',{cx,cy,rx:rx*1.1,ry:ry*1.1,class:'hillshade'},tbase);
+  el('ellipse',{cx,cy,rx,ry,class:'contour',...NSS},tbase);
+});
+for(let x=-840;x<=1680;x+=100) el('line',{x1:x,y1:-300,x2:x,y2:1500,class:'gridl',...NSS},tbase);
+for(let y=-280;y<=1400;y+=100) el('line',{x1:-900,y1:y,x2:1800,y2:y,class:'gridl',...NSS},tbase);
+// mer Tyrrhénienne (côte simplifiée)
+const COAST_T='M-600,400 L-125,366 L25,399 L100,430 L158,460 L167,438 L183,405 L250,405 L301,438 L309,450 L376,466 L409,520 L460,640';
+el('path',{class:'sea',d:COAST_T+' L460,1200 L-600,1200 Z'},tbase);
+el('path',{class:'coast',...NSS,d:COAST_T},tbase);
+{const t=el('text',{x:60,y:520,class:'seal'},tbase);t.textContent='Mer Tyrrhénienne';}
+// fleuves et rivières (tracés simplifiés)
+const RIV={
+  garigliano:'M388,211 C400,232 418,250 421,268 C420,292 414,306 410,322 C404,340 398,352 392,368 C376,388 350,402 336,413 C322,426 314,438 309,450',
+  liri:'M-60,40 C20,80 100,130 160,165 C200,180 223,181 250,195 C280,205 320,210 350,212 C365,212 378,210 388,211',
+  gari:'M362,140 C368,160 375,180 380,195 C384,203 386,207 388,211',
+  ausente:'M291,294 C296,320 300,345 302,370 C303,390 298,410 300,430'
+};
+[[215,330,105,48],[60,240,95,42],[325,318,30,18],[400,90,50,24]].forEach(([cx,cy,rx,ry])=>el('ellipse',{cx,cy,rx,ry,class:'wood'},tbase));
+{const t=el('text',{x:150,y:395,class:'rlab',style:'fill:var(--woodl)'},tbase);t.textContent='Monts Aurunci';}
+{const t=el('text',{x:10,y:285,class:'rlab',style:'fill:var(--woodl)'},tbase);t.textContent='Monts Ausoni';}
+for(const k in RIV) el('path',{d:RIV[k],class:'river',...NSS},tbase);
+// emprises urbaines
+[[359,144,9],[172,404,8],[223,181,6],[134,189,5],[289,396,5],[-42,-22,9]].forEach(([cx,cy,r])=>{
+  el('path',{d:`M${cx-r},${cy} q${r*.3},${-r*.9} ${r},${-r*.8} q${r*.8},${-r*.1} ${r},${r*.6} q${-r*.1},${r*.9} ${-r},${r*.9} q${-r*.9},${r*.1} ${-r},${-r*.7}z`,class:'urban'},tbase);
+});
+// routes
+const ROADS=[
+ 'M-125,366 L25,289 L109,366 L172,404 L250,405 L289,396 L360,420 L420,440',
+ 'M172,404 L276,344 L291,294 L301,239 L359,144',
+ 'M289,396 L334,355 L354,358',
+ 'M291,294 L238,263 L134,189',
+ 'M134,189 L223,181 L250,144 L359,144 L450,120',
+ 'M250,144 L100,80 L-58,55 L-42,-22 L-400,-178',
+ 'M25,289 L50,233 L134,189',
+ 'M109,366 L109,255 L134,189',
+ 'M134,189 L60,120 L-58,55',
+ 'M223,181 L238,263'
+];
+ROADS.forEach(d=>el('path',{d,class:'roadc',...NSS},tbase));
+ROADS.forEach(d=>el('path',{d,class:'road',...NSS},tbase));
+const RLAB=[['Garigliano',428,300],['Liri',120,145],['Gari',372,175],['Ausente',306,355]];
+const rlabEls=RLAB.map(([t,x,y])=>{const g=el('g',{},tbase);const tx=el('text',{x:0,y:0,class:'rlab'},g);tx.textContent=t;return {g,x,y};});
+
+// localités et sommets (positions projetées, arrondies ; sommets indicatifs)
+const PLACES=[
+ ['Castelforte',354,358,1],['Monte Majo',322,315,1],['Ausonia',291,294,1],['Esperia',238,263,1],['Pico',134,189,1],
+ ['Cassino',359,144,1],['Minturno',289,396,1],['Pontecorvo',223,181,1],['Formia',172,404,1],
+ ['Monte Faito',330,336],['Girofano',361,305],['Cerasola',368,282],['Monte Petrella',217,333],['Monte Revole',175,300],
+ ['Monte d’Oro',214,232],['Spigno',276,344],['Itri',109,366],['Gaeta',150,452],['Fondi',25,289],['Lenola',50,233],
+ ['San Giorgio a Liri',301,239],['Sant’Apollinare',359,250],['Aquino',250,144],['Ceccano',-58,55],['Frosinone',-42,-22],
+ ['Campodimele',109,255],['Castello',270,330]
+];
+const tplaces=$('tplaces');
+const placeEls=PLACES.map(([n,x,y,k])=>{
+  const g=el('g',{class:'place '+(k?'key':'minor')},tplaces);
+  el('circle',{cx:0,cy:0,r:k?3.6:2.6},g);
+  const t=el('text',{x:6,y:-5},g);t.textContent=n;
+  return {g,x,y};
+});
+
+/* ================= UNITÉS (APP-6) ================= */
+const UD={
+ dmi1:['U','inf','XX','1 DMI'], dim2:['U','inf','XX','2 DIM'], dia3:['U','inf','XX','3 DIA'], dmm4:['U','inf','XX','4 DMM'],
+ gtm:['U','inf','X','GTM'], pol2:['B','inf','XXX','2 PL','pl'], can1:['B','inf','XX','1 CA','ca'],
+ d71:['C','inf','XX','71'], d94:['C','inf','XX','94'], pz26:['C','arm','XX','26 Pz'], fj1:['C','para','XX','1 FJ']
+};
+/* drapeaux : 13 × 8,6, dessinés en SVG. Ajouter une nation = ajouter une entrée. */
+function tri(g,c,dir,W,H){c.forEach((col,k)=>el('rect',dir==='v'?{x:k*W/3,width:W/3+.05,height:H,fill:col}:{y:k*H/3,width:W,height:H/3+.05,fill:col},g));}
+const FLAGS={
+  us:(g,W,H)=>{el('rect',{width:W,height:H,fill:'#B22234'},g);[1,3,5].forEach(k=>el('rect',{y:k*H/7,width:W,height:H/7,fill:'#fff'},g));el('rect',{width:5.8,height:H*4/7,fill:'#3C3B6E'},g);},
+  de:(g,W,H)=>{el('rect',{width:W,height:H,fill:'#D8161E'},g);el('circle',{cx:W/2,cy:H/2,r:3.5,fill:'#fff'},g);const a=2.1;
+    el('path',{d:`M0,${-a} V${a} M${-a},0 H${a} M0,${-a} H${a} M${a},0 V${a} M0,${a} H${-a} M${-a},0 V${-a}`,transform:`translate(${W/2},${H/2}) rotate(45)`,fill:'none',stroke:'#111','stroke-width':.95},g);},
+  uk:(g,W,H)=>{const X=`M0,0 L${W},${H} M${W},0 L0,${H}`,P=`M${W/2},0 V${H} M0,${H/2} H${W}`;el('rect',{width:W,height:H,fill:'#012169'},g);
+    el('path',{d:X,stroke:'#fff','stroke-width':1.9},g);el('path',{d:X,stroke:'#C8102E','stroke-width':.7},g);
+    el('path',{d:P,stroke:'#fff','stroke-width':2.8},g);el('path',{d:P,stroke:'#C8102E','stroke-width':1.5},g);},
+  fr:(g,W,H)=>tri(g,['#002395','#fff','#ED2939'],'v',W,H),
+  pl:(g,W,H)=>{el('rect',{width:W,height:H/2,fill:'#fff'},g);el('rect',{y:H/2,width:W,height:H/2,fill:'#DC143C'},g);},
+  /* Canada en 1944 : Red Ensign, simplifié */
+  ca:(g,W,H)=>{el('rect',{width:W,height:H,fill:'#C8102E'},g);const s=document.createElementNS(NS,'g');s.setAttribute('transform','scale(.5)');g.appendChild(s);FLAGS.uk(s,W,H);}
+};
+const NATION_NAME={us:'États-Unis',de:'Allemagne (IIIe Reich)',uk:'Royaume-Uni',fr:'France',pl:'Pologne',ca:'Canada'};
+function flagEl(nat,parent,x,y){
+  const g=el('g',{class:'flag',transform:`translate(${x},${y})`},parent),W=13,H=8.6;
+  (FLAGS[nat]||((g,W,H)=>el('rect',{width:W,height:H,fill:'#999'},g)))(g,W,H);
+  el('rect',{width:W,height:H,fill:'none',stroke:'rgb(0 0 0 / .45)','stroke-width':.6},g);
+  return g;
+}
+function flagMarkup(nat){const s=document.createElementNS(NS,'svg');flagEl(nat,s,0,0);return s.innerHTML;}
+function mkUnit(side,type,ech,lab,parent,endLab,nat){
+  const g=el('g',{class:`unit ${side}`},parent);
+  el('circle',{r:30,class:'halo'},g);
+  if(side!=='C'){
+    el('rect',{x:-17,y:-11,width:34,height:22,class:'frame'},g);
+    if(type==='inf'||type==='mech'||type==='para') el('path',{d:'M-17,-11 L17,11 M-17,11 L17,-11',class:'ic'},g);
+    if(type==='cav') el('path',{d:'M-17,11 L17,-11',class:'ic'},g);
+    if(type==='arm'||type==='mech') el('ellipse',{cx:0,cy:0,rx:11,ry:6,class:'ic'},g);
+    const e=el('text',{x:0,y:-14,class:'ech'},g);e.textContent=ech;
+  }else{
+    el('path',{d:'M0,-16 L17,0 L0,16 L-17,0 Z',class:'frame'},g);
+    if(type==='inf'||type==='mech'||type==='para') el('path',{d:'M-8,-8 L8,8 M-8,8 L8,-8',class:'ic'},g);
+    if(type==='cav') el('path',{d:'M-8,8 L8,-8',class:'ic'},g);
+    if(type==='arm'||type==='mech') el('ellipse',{cx:0,cy:0,rx:9,ry:5,class:'ic'},g);
+    if(type==='para') el('path',{d:'M-6,11 q3,-4 6,0 q3,-4 6,0',class:'ic'},g);
+    const e=el('text',{x:0,y:-19,class:'ech'},g);e.textContent=ech;
+  }
+  flagEl(nat||CFG.sideNation[side],g,-34,-11);
+  const t=el('text',{x:endLab?-38:21,y:5,class:'ulab','text-anchor':endLab?'end':'start'},g);t.textContent=lab;
+  return g;
+}
+const tunits=$('tunits'); const U={}; const P={}; const VIS={};
+for(const id in UD){
+  const [side,type,ech,lab,nat]=UD[id];
+  const g=mkUnit(side,type,ech,lab,tunits,false,nat);g.classList.add('gone');
+  U[id]=g; P[id]=[250,250]; VIS[id]=false;
+}
+
+/* ================= [DONNÉES] CARTE STRATÉGIQUE (1 km ≈ 2 unités) =================
+   Projection : x = (longitude − 11,4) × 167 ; y = (42,6 − latitude) × 222 */
+const LL=(lon,lat)=>[+((lon-11.4)*167).toFixed(1),+((42.6-lat)*222).toFixed(1)];
+const LD=pts=>'M'+pts.map(p=>LL(p[0],p[1]).join(',')).join(' L');
+const sbase=$('sbase');
+el('rect',{x:-2000,y:-2000,width:5000,height:5000,style:'fill:var(--land)'},sbase);
+for(let x=0;x<=880;x+=110) el('line',{x1:x,y1:-100,x2:x,y2:800,class:'gridl',...NSS},sbase);
+for(let y=0;y<=634;y+=110) el('line',{x1:-100,y1:y,x2:1000,y2:y,class:'gridl',...NSS},sbase);
+const TYR=[[11.0,42.6],[11.21,42.44],[11.8,42.09],[12.05,41.95],[12.23,41.77],[12.45,41.62],[12.63,41.45],[12.9,41.33],[13.05,41.23],[13.25,41.29],
+  [13.43,41.26],[13.59,41.205],[13.62,41.255],[13.77,41.215],[13.93,41.02],[14.1,40.82],[14.25,40.84],[14.45,40.75],[14.37,40.62],[14.6,40.63],[14.76,40.68],[15.0,40.45],[15.3,40.1],[15.6,40.0]];
+el('path',{class:'sea',d:LD([[9,43.6],[11.0,43.6],...TYR,[15.6,38],[9,38]])+' Z'},sbase);
+el('path',{class:'coast',...NSS,d:LD(TYR)},sbase);
+const ADR=[[13.5,43.62],[13.9,43.0],[14.21,42.46],[14.4,42.35],[14.71,42.11],[14.99,42.0],[15.5,41.92],[16.0,41.95],[16.2,41.9],[15.92,41.63],[16.5,41.3],[17.5,40.9]];
+el('path',{class:'sea',d:LD([[13.4,44.5],...ADR,[19,40.9],[19,44.5]])+' Z'},sbase);
+el('path',{class:'coast',...NSS,d:LD(ADR)},sbase);
+[[[14.0,41.68],[13.7,41.55],[13.45,41.55],[13.15,41.67],[12.75,41.8],[12.4,41.85]]].forEach(p=>el('path',{d:LD(p),class:'river',...NSS},sbase)); /* Liri et Sacco, très simplifiés */
+el('path',{d:LD([[12.6,42.4],[12.48,41.9],[12.25,41.74]]),class:'river',...NSS},sbase); /* Tibre */
+const SP=[],STXT=[];
+[['Mer Tyrrhénienne',[12.0,40.9]],['Mer Adriatique',[15.2,42.4]]].forEach(([t,p])=>{const[x,y]=LL(...p);const e=el('text',{x,y,class:'seal'},sbase);e.textContent=t;STXT.push([e,17]);});
+[['LATIUM',[12.9,42.15]],['CAMPANIE',[14.6,41.1]],['ABRUZZES',[13.9,42.2]]].forEach(([t,p])=>{const[x,y]=LL(...p);const e=el('text',{x,y,class:'maplab'},sbase);e.textContent=t;STXT.push([e,13]);});
+{const[x0,y0]=LL(13.28,41.665),[x1,y1]=LL(13.94,41.197);el('rect',{x:x0,y:y0,width:x1-x0,height:y1-y0,style:'fill:none;stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 3',...NSS},sbase);}
+const zl=el('text',{x:LL(13.28,41.197)[0],y:LL(13.28,41.197)[1]+14,class:'maplab',style:'letter-spacing:0;transition:opacity .5s'},sbase);zl.textContent='carte détaillée';STXT.push([zl,11]);
+[['Rome',12.5,41.9],['Naples',14.25,40.85],['Anzio',12.63,41.45],['Cassino',13.83,41.49],['Frosinone',13.35,41.64],['Valmontone',12.92,41.78],
+ ['Terracina',13.25,41.29],['Ortona',14.4,42.35],['Pescara',14.21,42.46],['Civitavecchia',11.8,42.09],['Gaète',13.57,41.21]].forEach(([n,lon,lat])=>{
+  const[x,y]=LL(lon,lat),end=['Ortona','Pescara','Cassino'].includes(n);
+  const g=el('g',{class:'place key',transform:`translate(${x},${y})`},sbase);SP.push({g,x,y});
+  el('circle',{cx:0,cy:0,r:3.2},g); const t=el('text',{x:end?-6:6,y:-5,'text-anchor':end?'end':'start'},g); t.textContent=n;
+});
+
+/* ================= [DONNÉES] SCÉNARIO ================= */
+const GRID={
+ lib:['Liberté d’action','Foch','p'], conc:['Concentration des efforts','Foch','p'], eco:['Économie des moyens','Foch','p'],
+ comp:['Compréhension','FSO','f'], coop:['Coopération','FSO','f'], agil:['Agilité','FSO','f'], masse:['Masse','FSO','f'],
+ end:['Endurance','FSO','f'], fm:['Force morale','FSO','f'], cdt:['Performance du commandement','FSO','f'],
+ fric:['Friction','Clausewitz','c']};
+const SUEL={};
+const gridName=Object.fromEntries(Object.entries(GRID).map(([k,v])=>[v[0],k]));
+const SUP=(id,side,ech,lab,lon,lat,e,nat)=>{const[x,y]=LL(lon,lat);return{id,side,ech,lab,x,y,e,nat};};
+const GUSTAV=LD([[13.77,41.215],[13.86,41.4],[13.83,41.49],[13.95,41.6],[14.1,41.75],[14.2,41.95],[14.3,42.15],[14.4,42.35]]);
+const SU0=[SUP('cef','U','XXX','CEF (Juin)',13.95,41.33),SUP('us2','B','XXX','2e corps US',13.72,41.12,1),SUP('uk8','B','XXXX','8e Armée',14.2,41.5,0,'uk'),
+  SUP('us6','B','XXX','6e corps US',12.75,41.58,1),SUP('de10','C','XXXX','10. Armee',13.55,41.65,1),SUP('de14','C','XXXX','14. Armee',12.75,41.85,1)];
+const FRONT_T='M0,0';
+const BOX='M302,290 L372,284 L370,346 L308,352 Z';
+const INIT={dmi1:[402,262],dmm4:[402,300],dim2:[388,336],dia3:[378,376],gtm:[440,330],d71:[326,312],d94:[258,388]};
+
+const S=[
+{day:'Contexte',mode:'strat',date:'Janvier–avril 1944',time:'Devant la ligne Gustav',
+ t:'Un hiver bloqué devant Cassino',
+ c:['end','fm'],
+ f:"Trois offensives alliées contre Cassino échouent entre janvier et mars 1944 ; la tête de pont d’Anzio, débarquée en janvier, reste enfermée.",
+ q:"Pourquoi la supériorité matérielle alliée ne suffit-elle pas à percer en Italie ?",
+ strat:{cam:[110,20,500,420],units:SU0,front:GUSTAV,zone:[{cx:LL(12.66,41.5)[0],cy:LL(12.66,41.5)[1],rx:22,ry:16}],arrows:[],
+   ann:[{x:LL(14.15,41.8)[0],y:LL(14.15,41.8)[1],t:'Ligne Gustav'},{x:LL(12.63,41.45)[0],y:LL(12.63,41.45)[1],t:'Tête de pont, janvier 1944',e:1,dy:22}]}},
+
+{day:'Contexte',mode:'tac',cam:[110,150,330,290],date:'4 avril – 11 mai 1944',time:'Le plan Juin',
+ t:'Percer par la montagne « infranchissable »',
+ c:['conc','comp'],
+ f:"En mai 1944, le corps expéditionnaire compte environ 112 000 hommes, dont 60 % de Maghrébins encadrés par des officiers français, 12 000 véhicules et 2 500 chevaux et mulets.",
+ q:"Pourquoi le défenseur tient-il légèrement un terrain qu’il croit infranchissable ? Quel risque prend-il ?",
+ u:INIT,
+ g:[{k:'obj',x:322,y:315,rx:16,ry:11,lab:'MAJO'},{k:'obj',x:134,y:189,rx:18,ry:12,lab:'PICO'},
+   {k:'main',p:[[372,332],[330,318],[295,296],[240,266],[146,196]]},{k:'sup',p:[[364,368],[300,352],[230,336],[180,302],[150,210]]}],
+ arrows:[],ann:[{x:200,y:390,t:'Massif sans routes',e:1}]},
+
+{day:'11–13 mai',mode:'tac',cam:[292,262,118,110],date:'11 mai 1944',time:'23 h',
+ t:'Diadem : le feu de mille six cents canons',
+ c:['masse','lib'],
+ f:"Selon les sources américaines, l’offensive s’ouvre sur une préparation de 1 600 pièces d’artillerie sur l’ensemble du front, de Cassino à la mer.",
+ q:"Que peut, et que ne peut pas, une préparation d’artillerie face à des positions fortifiées et minées ?",
+ u:INIT, box:true, pulse:true, fx:'carpet',
+ arrows:[],ann:[{x:412,y:352,t:'Tête de pont du Garigliano'}]},
+
+{day:'11–13 mai',mode:'tac',cam:[292,262,125,128],date:'12 mai 1944',time:'Toute la journée',
+ t:'Le 12 mai, l’attaque piétine',
+ c:['fric','fm'],
+ f:"Le 12 mai au soir, malgré deux succès locaux, Castelforte et le mont Faito, l’attaque ne perce pas : les positions, minées et préparées depuis des mois, résistent.",
+ q:"Que doit faire un chef dont l’attaque piétine au soir du premier jour ?",
+ u:{dim2:[334,340],dia3:[356,362],dmi1:[392,270],dmm4:[394,308],gtm:[440,330],d71:[318,312],d94:[258,388]},
+ arrows:[{d:'M396,266 L376,276',s:'U'},{d:'M392,312 L372,306',s:'U'},{d:'M374,340 L346,338',s:'U'}],
+ ann:[{x:372,y:292,t:'Assauts brisés',e:1}]},
+
+{day:'11–13 mai',mode:'tac',cam:[282,262,150,140],date:'13 mai 1944',time:'14 h – 15 h 30',
+ t:'Le drapeau sur le Majo',
+ c:['cdt','fm'],
+ f:"Vers 15 h 30, un drapeau tricolore de trente mètres carrés est hissé au sommet du Majo, visible à des kilomètres à la ronde.",
+ q:"Quels indices montrent qu’une défense est rompue, et pas seulement repoussée ?",
+ u:{dim2:[322,320],dmi1:[360,300],dia3:[346,352],dmm4:[376,330],gtm:[430,330],d71:[272,320,'b'],d94:[256,390]},
+ via:{dim2:[[330,336]]},
+ arrows:[{d:'M376,290 L364,300',s:'U'},{d:'M334,334 L324,322',s:'U'}],
+ g:[{k:'obj',x:322,y:315,rx:16,ry:11,lab:'MAJO'}],
+ ann:[{x:322,y:300,t:'Drapeau tricolore',e:1}]},
+
+{day:'14–18 mai',mode:'tac',cam:[200,250,220,160],date:'14–15 mai 1944',time:'Exploitation',
+ t:'L’Ausente franchi, la montagne ouverte',
+ c:['agil','lib'],
+ f:"Le 14 mai, la rive gauche de l’Ausente est nettoyée ; le 15, le corps expéditionnaire force l’entrée du massif de la Petrella, à Castello.",
+ q:"Pourquoi engager les troupes de montagne maintenant, et pas dès le premier jour ?",
+ u:{dia3:[300,302],dim2:[312,330],dmm4:[278,348],gtm:[296,364],dmi1:[342,282],d71:[256,300,'b'],d94:[240,382]},
+ arrows:[{d:'M322,302 L302,298',s:'U'},{d:'M300,352 L262,342',s:'U'}],
+ g:[{k:'sup',p:[[286,348],[232,336],[186,306]]}],
+ ann:[{x:270,y:330,t:'Entrée du massif',e:1,dy:18}]},
+
+{day:'14–18 mai',mode:'tac',cam:[148,258,210,140],date:'15–17 mai 1944',time:'Monts Aurunci',
+ t:'Goumiers et mulets dans les Aurunci',
+ c:['agil','end'],
+ f:"Le corps de montagne réunit la 4e division marocaine de montagne et trois groupements de tabors marocains, commandés par les colonels Leblanc, Massiet du Biest et le lieutenant-colonel Gautier.",
+ q:"Qu’est-ce qui fait qu’une troupe transforme un obstacle en axe de manœuvre ?",
+ u:{gtm:[205,326],dmm4:[180,306],dia3:[272,288],dim2:[292,302],d71:[244,276,'b']},
+ via:{gtm:[[250,345]],dmm4:[[230,330]]},
+ arrows:[{d:'M262,348 L218,332',s:'U'},{d:'M220,326 L184,308',s:'U'}],
+ ann:[{x:190,y:350,t:'Ni routes ni sentiers',e:1}]},
+
+{day:'14–18 mai',mode:'tac',cam:[178,214,190,140],date:'17 mai 1944',time:'Esperia',
+ t:'Esperia tombe, la charnière saute',
+ c:['lib','eco'],
+ f:"Esperia est conquise les 16 et 17 mai, sous la menace des colonnes de montagne qui débordent la défense par le sud.",
+ q:"Pourquoi des renforts engagés par fractions ne colmatent-ils pas une brèche ?",
+ u:{dia3:[242,266],gtm:[196,300],dmm4:[176,286],dim2:[272,276],d71:[214,244,'b']},
+ arrows:[{d:'M268,276 L248,268',s:'U'},{d:'M198,296 L220,268',s:'U'},{d:'M200,236 L218,244',s:'C',dash:1}],
+ ann:[]},
+
+{day:'14–18 mai',mode:'tac',cam:[180,104,250,200],date:'18 mai 1944',time:'Cassino',
+ t:'Cassino tombe, retour sur la ligne Senger',
+ c:['conc','coop'],
+ f:"Le 18 mai, le 2e corps polonais occupe les ruines de l’abbaye du Mont-Cassin, évacuées par les parachutistes allemands.",
+ q:"Dans une coalition, comment mesurer la part de chacun dans la victoire ?",
+ u:{pol2:[384,134],fj1:[338,128,'b'],dia3:[236,252],dmm4:[180,282],d71:[214,232,'b']},
+ arrows:[{d:'M336,140 L262,150',s:'C',dash:1},{d:'M204,226 L170,200',s:'C',dash:1}],
+ ann:[{x:352,y:126,t:'Abbaye du Mont-Cassin',e:1}]},
+
+{day:'19–25 mai',mode:'tac',cam:[98,156,190,150],date:'19–22 mai 1944',time:'Pico',
+ t:'Pico, verrou de la ligne Senger',
+ c:['end','fm'],
+ f:"Pico tombe le 22 mai après de violents combats ; du 23 au 25 mai, la 26e Panzerdivision contre-attaque encore face au corps expéditionnaire.",
+ q:"Comment une infanterie sans chars en nombre tient-elle face à une division blindée ?",
+ u:{dia3:[150,204],dmi1:[178,222],gtm:[118,244],pz26:[124,172]},
+ zone:[{cx:134,cy:189,rx:16,ry:11}],
+ arrows:[{d:'M196,228 L156,206',s:'U'},{d:'M116,140 L124,166',s:'C'}],
+ ann:[]},
+
+{day:'19–25 mai',mode:'tac',cam:[60,170,300,220],date:'Avril – juin 1944',time:'Ciociaria',
+ t:'La face sombre : les crimes de Ciociaria',
+ c:['fm','cdt'],
+ f:"Estimations : 2 000 à 3 000 victimes selon le ministère italien de la Défense (1997), plusieurs milliers de viols selon l’historienne Julie Le Gac ; ces chiffres restent débattus. Selon les sources disponibles, 207 militaires du corps expéditionnaire sont traduits devant des tribunaux militaires français et 156 condamnés.",
+ q:"En quoi la discipline et le respect du droit font-ils partie de la valeur d’une troupe ?",
+ zone:[{cx:200,cy:255,rx:120,ry:65}],
+ arrows:[],ann:[]},
+
+{day:'19–25 mai',mode:'tac',cam:[-130,30,500,300],date:'23 mai 1944',time:'Ligne Senger et Anzio',
+ t:'La ligne Senger cède, Anzio sort',
+ c:['coop','lib'],
+ f:"Les 23 et 24 mai, les Canadiens prennent Pontecorvo ; le 23, le 6e corps américain sort de la tête de pont d’Anzio.",
+ q:"Pourquoi attaquer au même moment sur la ligne Senger et à Anzio ?",
+ u:{can1:[228,168],dia3:[98,196],dmi1:[132,214],gtm:[60,244],pz26:[112,150,'b']},
+ arrows:[{d:'M100,206 L30,156',s:'U'},{d:'M180,140 L0,60',s:'C',dash:1},{d:'M92,166 L-40,72',s:'C',dash:1}],
+ ann:[{x:-58,y:55,t:'Vers Rome',e:1}]},
+
+{day:'26 mai – 4 juin',mode:'strat',date:'Fin mai 1944',time:'Valmontone ou Rome',
+ t:'Le choix de Clark',
+ c:['conc','eco'],
+ f:"Le plan d’Alexander prévoyait de couper à Valmontone la route de repli de la 10e Armée allemande ; Clark oriente l’effort principal vers Rome.",
+ q:"Un objectif de prestige peut-il primer sur la destruction de l’armée ennemie ?",
+ strat:{cam:[130,110,320,220],units:[SUP('us6b','B','XXX','6e corps US',12.7,41.55,1),SUP('de10b','C','XXXX','10. Armee',13.3,41.68,0)],
+   arrows:[{d:LD([[12.68,41.52],[12.9,41.74]]),s:'U',dash:1,lab:'Plan Alexander',lx:LL(12.95,41.72)[0],ly:LL(12.95,41.72)[1]},
+     {d:LD([[12.66,41.52],[12.55,41.84]]),s:'U',lab:'Choix de Clark',lx:LL(12.25,41.7)[0],ly:LL(12.25,41.7)[1]},
+     {d:LD([[13.35,41.7],[13.05,41.95],[12.8,42.25]]),s:'C',dash:1}],
+   ann:[]}},
+
+{day:'26 mai – 4 juin',mode:'strat',date:'4–5 juin 1944',time:'Rome',syn:true,
+ t:'Rome, et la renaissance d’une armée',
+ c:['lib','coop','comp'],
+ f:"Le 5 juin, Clark entre dans Rome avec ses commandants de corps, dont Juin ; le corps expéditionnaire participe ainsi à la libération de la capitale.",
+ q:"Qu’est-ce que le Garigliano a changé pour l’armée française de 1944 ?",
+ strat:{cam:[110,60,400,320],
+   arrows:[{d:LD([[13.9,41.33],[13.56,41.45],[13.2,41.62],[12.9,41.8],[12.56,41.88]]),s:'U',lab:'Corps expéditionnaire',lx:LL(13.3,41.5)[0],ly:LL(13.3,41.5)[1]+16}],
+   units:[SUP('cef2','U','XXX','CEF',13.0,41.72)],
+   ann:[{x:LL(12.5,41.9)[0],y:LL(12.5,41.9)[1],t:'4 juin',dy:20}]}}
+];
+
+const FR={
+ f11:{h:2,cls:'d27',lab:'11 mai',p:[[[362,150],[372,205],[378,240],[382,268],[372,308],[360,345],[346,372],[300,386],[270,406],[250,432]]]},
+ f13:{h:4,cls:'d28',lab:'13 mai',p:[[[362,150],[372,205],[360,245],[330,270],[306,290],[300,322],[300,352],[280,386],[256,412]]]},
+ f15:{h:6,cls:'d29',lab:'15 mai',p:[[[362,150],[342,205],[302,230],[264,256],[246,280],[232,300],[226,330]]]},
+ f17:{h:7,cls:'d27',lab:'17 mai',p:[[[362,150],[302,196],[256,218],[226,238],[200,258],[170,276],[150,330]]]},
+ f22:{h:9,cls:'d28',lab:'22 mai',p:[[[330,140],[262,150],[226,172],[160,166],[116,192],[96,232],[70,300]]]}};
+const PEN=null;
+const STEP_H=[-1,1,2,3,4,5,6,7,8,9,10,11,12,13];
+const REF={Foch:'Principe de la guerre · Foch',FSO:'Facteur de supériorité opérationnelle',Clausewitz:'Clausewitz, De la guerre'};
+const LESSONS=[
+ ['conc','Juin propose de porter l’effort là où l’ennemi ne l’attend pas : dans la montagne, avec les troupes faites pour elle.','Choisir l’effort principal en fonction de l’ennemi et de ses propres aptitudes, pas seulement de la carte.','Mon effort principal vise-t-il le point faible de l’adversaire, ou seulement l’axe le plus évident ?'],
+ ['comp','Les Allemands tiennent légèrement les Aurunci, jugés infranchissables ; Juin a compris que ses tirailleurs et ses goumiers pouvaient y passer.','Connaître le terrain, ses troupes et les certitudes de l’adversaire.','Quelles certitudes de l’adversaire puis-je retourner contre lui, et ai-je vérifié les miennes ?'],
+ ['lib','Après le Majo, l’exploitation commence dès le 14 mai, sans laisser à l’ennemi le temps de se rétablir.','Exploiter immédiatement ; tenir le rythme plutôt que de consolider.','Ai-je les moyens d’exploiter dès que la brèche s’ouvre ?'],
+ ['agil','Le corps de montagne n’est engagé qu’une fois la brèche ouverte, dans la direction où il change tout.','Garder une réserve adaptée et l’engager au bon moment, dans le bon milieu.','Quelle réserve puis-je engager au bon endroit, dans le milieu où elle change la donne ?'],
+ ['end','Mulets et brêles portent armes, munitions et eau dans un massif sans routes.','Adapter la logistique au milieu : l’autonomie conditionne la manœuvre.','Ma logistique permet-elle réellement la manœuvre dans ce milieu ?'],
+ ['fric','Le 12 mai, l’attaque ne perce pas sur la Cerasola et le Girofano, face à des positions minées ; Juin relance dès le lendemain.','Accepter l’échec initial, l’analyser vite et relancer.','Comment mon plan survit-il à un premier échec, et qui décide de relancer ?'],
+ ['fm','Les tirailleurs marocains enlèvent le Majo ; mais des soldats du corps commettent aussi des crimes contre les civils de Ciociaria.','La force morale inclut la discipline et le respect du droit.','Quelles règles de conduite garantissent que la victoire reste légitime au regard du droit et des populations ?'],
+ ['cdt','Juin conçoit le plan, le défend auprès des Alliés, relance l’attaque après l’échec du 12 mai.','Un chef qui pense la manœuvre et en assume l’exécution.','Qui conçoit, défend et assume la manœuvre, et à quel niveau se décide la relance ?'],
+ ['coop','Polonais à Cassino, Britanniques et Canadiens dans la vallée du Liri, Américains sur la côte et à Anzio : chacun fixe pendant que l’autre perce.','Agir en coalition : synchroniser des efforts nationaux différents.','Que fixe mon allié pendant que je perce, et le sait-il ?'],
+ ['masse','Mille six cents pièces ouvrent le feu le 11 mai, mais la préparation seule ne perce pas : l’attaque piétine le 12.','La masse des feux prépare ; la manœuvre décide.','Que peut préparer la masse des feux, et que doit décider la manœuvre ?'],
+ ['eco','Clark préfère Rome à Valmontone ; une partie de la 10e Armée allemande échappe à l’encerclement.','Ne pas confondre l’objectif de prestige et la destruction de l’adversaire.','Mon objectif sert-il la destruction de l’adversaire ou l’image du succès ?']
+];
+
+/* ================= [DONNÉES] FICHES D'UNITÉS ================= */
+const UINFO={
+ dmi1:['1re division de marche d’infanterie (ex-1re DFL)','Corps expéditionnaire français (général Juin)','Général Diego Brosset'],
+ dim2:['2e division d’infanterie marocaine','Corps expéditionnaire français','Général André Dody'],
+ dia3:['3e division d’infanterie algérienne','Corps expéditionnaire français','Général Joseph de Goislard de Monsabert'],
+ dmm4:['4e division marocaine de montagne','Corps expéditionnaire français, corps de montagne','Général François Sevez'],
+ gtm:['Trois groupements de tabors marocains','Corps expéditionnaire français, corps de montagne','Général Augustin Guillaume'],
+ pol2:['2e corps polonais','8e Armée britannique','Général Władysław Anders'],
+ can1:['1re division d’infanterie canadienne','1er corps canadien, 8e Armée britannique',''],
+ d71:['71. Infanterie-Division','XIV. Panzerkorps (général von Senger und Etterlin)',''],
+ d94:['94. Infanterie-Division','XIV. Panzerkorps',''],
+ pz26:['26. Panzer-Division','Engagée devant Pico, fin mai',''],
+ fj1:['1. Fallschirmjäger-Division','LI. Gebirgskorps, à Cassino','']
+};
+
+/* ================= MOTEUR (ne pas modifier) ================= */
+const tac=$('tacsvg'), strat=$('stratsvg'), mapwrap=$('mapwrap'), bocage=$('bocage'), app=$('app');
+let sbox=[-20,-70,920,900],vb=[0,0,900,1100], anim=null, zoomL=1, showG=true, GH=[], still=false;
+const EVER={}, ROUTES={}, DIM={};
+function effScale(svg,w,h){const r=svg.getBoundingClientRect();return Math.min(r.width/w,r.height/h)||1;}
+function kFactor(){const w=mapwrap.clientWidth;return (w<600?0.8:w>1700?1.2:1)*zoomL;}
+const padCam=c=>{const port=innerHeight>innerWidth;return port?[c[0],c[1]-c[3]*.25,c[2],c[3]*2.3]:[c[0]-c[2]*.05,c[1]-c[3]*.1,c[2]*1.1,c[3]*1.5];};
+function unitScale(w,h){return kFactor()/effScale(tac,w,h);}
+function applyFrame(box,s,pos){
+  tac.setAttribute('viewBox',box.join(' '));
+  placeEls.forEach(p=>p.g.setAttribute('transform',`translate(${p.x},${p.y}) scale(${s})`));
+  rlabEls.forEach(p=>p.g.setAttribute('transform',`translate(${p.x},${p.y}) scale(${s})`));
+  GH.forEach(p=>p.g.setAttribute('transform',`translate(${p.x},${p.y}) scale(${s})`));
+  tac.classList.toggle('minor-off',box[2]>560);
+  bocage.setAttribute('patternTransform',`scale(${Math.max(.35,s*1.2)})`);
+  for(const id in pos) U[id].setAttribute('transform',`translate(${pos[id][0]},${pos[id][1]}) scale(${s})`);
+  updateScale(box);
+}
+function updateScale(box){
+  const isStrat=S[cur].mode==='strat';
+  const eff=isStrat?effScale(strat,sbox[2],sbox[3]):effScale(tac,box[2],box[3]);
+  const pxPerKm=(isStrat?CFG.kmStrat:CFG.kmTac)*eff;
+  const opts=isStrat?[20,50,100,200]:[1,2,5,10,20];
+  let km=opts[0];for(const o of opts){if(o*pxPerKm<=130)km=o;}
+  $('sbar').style.width=Math.round(km*pxPerKm)+'px';$('stxt').textContent=km+' km';
+}
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pd=p=>'M'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' L');
+function along(p,t){
+  if(p.length===1)return[p[0][0],p[0][1],1,0];
+  const L=[0];for(let i=1;i<p.length;i++)L.push(L[i-1]+Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]));
+  const d=t*L[L.length-1];
+  for(let i=1;i<p.length;i++){if(d<=L[i]||i===p.length-1){const k=Math.min(1,Math.max(0,(d-L[i-1])/((L[i]-L[i-1])||1)));
+    return[p[i-1][0]+(p[i][0]-p[i-1][0])*k,p[i-1][1]+(p[i][1]-p[i-1][1])*k,p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]];}}
+}
+function rng(seed){return()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function arrowEls(list,parent,s,labParent){
+  (list||[]).forEach((a,i)=>{
+    const p=el('path',{d:a.d,class:`arrow ${a.s}`,'stroke-width':(a.dash?4:6.5)*s},parent);
+    const mk=()=>p.setAttribute('marker-end',`url(#m${a.s})`);
+    if(a.dash){p.setAttribute('stroke-dasharray',`${10*s} ${7*s}`);p.classList.add('fade');p.style.animationDelay=(1.1+i*0.2)+'s';mk();}
+    else{const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.setProperty('--len',L);p.classList.add('draw');p.style.animationDelay=(1.1+i*0.25)+'s';
+      if(reduce||still)mk();else p.addEventListener('animationend',mk,{once:true});}
+    if(a.lab){const t=el('text',{x:a.lx,y:a.ly,class:`alab ${a.s} fade`,'font-size':14*s,'stroke-width':4*s},labParent);t.textContent=a.lab;t.style.animationDelay=(1+i*0.25)+'s';}
+  });
+}
+function annEls(list,parent,s,delay){
+  (list||[]).forEach((a,i)=>{
+    const g=el('g',{class:'ann fade',transform:`translate(${a.x},${a.y}) scale(${s})`},parent);g.style.animationDelay=(delay+i*0.3)+'s';
+    el('circle',{cx:0,cy:0,r:4.5,class:'pin'},g);
+    const t=el('text',{x:a.e?-9:9,y:a.dy||5,'font-size':14,'text-anchor':a.e?'end':'start'},g);t.textContent=a.t;
+  });
+}
+
+/* graphiques de manœuvre APP-6 */
+function T(parent,x,y,txt,s,cls,anchor,size,halo){const t=el('text',{x,y,class:'mgt '+(cls||''),'font-size':(size||12)*s,'text-anchor':anchor||'middle','stroke-width':(halo||3.5)*s},parent);t.textContent=txt;return t;}
+function offset(pts,off){return pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];let dx=b[0]-a[0],dy=b[1]-a[1];const L=Math.hypot(dx,dy)||1;return[p[0]-dy/L*off,p[1]+dx/L*off];});}
+function axisPath(pts,w){
+  const n=pts.length,e=pts[n-1],p=pts[n-2];let dx=e[0]-p[0],dy=e[1]-p[1];const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
+  const base=[e[0]-dx*w*2.2,e[1]-dy*w*2.2], body=pts.slice(0,-1).concat([base]);
+  const l=offset(body,w/2), r=offset(body,-w/2).reverse(), hw=w*1.3;
+  const h1=[base[0]-dy*hw,base[1]+dx*hw], h2=[base[0]+dy*hw,base[1]-dx*hw];
+  const f=q=>q[0].toFixed(1)+','+q[1].toFixed(1);
+  return{body:'M'+l.map(f).join(' L')+' L'+f(h1)+' L'+f(e)+' L'+f(h2)+' L'+r.map(f).join(' L')+' Z',head:`M${f(h1)} L${f(e)} L${f(h2)} Z`};
+}
+function drawG(list,parent,s){
+  (list||[]).forEach((g,i)=>{
+    const w=el('g',{class:'fade'},parent);w.style.animationDelay=(2.6+i*0.12)+'s';
+    if(g.k==='ld'){el('path',{d:pd(g.p),class:'mg',...NSS},w);[g.p[0],g.p[g.p.length-1]].forEach(q=>T(w,q[0],q[1]-7*s,'LD',s));}
+    else if(g.k==='safe'){T(w,g.x,g.y,g.lab,s,'','start',11.5);}
+    else if(g.k==='bnd'){
+      el('path',{d:pd(g.p),class:'mg',...NSS},w);
+      const m=along(g.p,.5),L=Math.hypot(m[2],m[3])||1,nx=-m[3]/L,ny=m[2]/L;
+      T(w,m[0],m[1]+4*s,'XXX',s,'','middle',12,9);
+      T(w,m[0]+nx*26*s,m[1]+ny*26*s+4*s,g.a,s,'','middle',11);
+      T(w,m[0]-nx*26*s,m[1]-ny*26*s+4*s,g.b,s,'','middle',11);
+    }
+    else if(g.k==='obj'){el('ellipse',{cx:g.x,cy:g.y,rx:g.rx,ry:g.ry,class:'mg',...NSS},w);T(w,g.x,g.y+g.ry+12*s,'OBJ '+g.lab,s,'','middle',10.5);}
+    else if(g.k==='main'||g.k==='sup'){const a=axisPath(g.p,8*s),sd=g.s||'U';el('path',{d:a.body,class:'mg '+sd,...NSS},w);if(g.k==='main')el('path',{d:a.head,class:'mgf '+sd},w);}
+    else if(g.k==='blk'){
+      const gg=el('g',{transform:`translate(${g.x},${g.y}) rotate(${g.a}) scale(${s})`},w);
+      el('path',{d:'M0,-11 L0,11 M0,0 L-24,0',class:'mg '+(g.s||'U'),...NSS},gg);
+      const t=el('text',{x:-12,y:-4,class:'mgt '+(g.s||'U'),'font-size':12,'text-anchor':'middle','stroke-width':3.5,transform:`rotate(${-g.a} -12 -8)`},gg);t.textContent='B';
+    }
+    else if(g.k==='enc'){
+      el('ellipse',{cx:g.cx,cy:g.cy,rx:g.rx,ry:g.ry,class:'mg U',...NSS},w);
+      let d='';for(let k=0;k<22;k++){const th=k/22*Math.PI*2,x=g.cx+g.rx*Math.cos(th),y=g.cy+g.ry*Math.sin(th),vx=g.cx-x,vy=g.cy-y,L=Math.hypot(vx,vy)||1;
+        d+=`M${x.toFixed(1)},${y.toFixed(1)} L${(x+vx/L*5*s).toFixed(1)},${(y+vy/L*5*s).toFixed(1)} `;}
+      el('path',{d,class:'mg U',...NSS},w);
+      T(w,g.cx,g.cy-g.ry-6*s,'ENCERCLEMENT',s,'U','middle',10.5);
+    }
+    else if(g.k==='gap'){
+      const gg=el('g',{transform:`translate(${g.x},${g.y}) rotate(${g.a||0}) scale(${s})`},w);
+      el('path',{d:'M-12,-13 L-6,-7 L6,-7 L12,-13 M-12,13 L-6,7 L6,7 L12,13',class:'mg',...NSS},gg);
+      T(w,g.x+18*s,g.y+4*s,g.lab,s,'','start',12);
+    }
+  });
+}
+
+/* effets */
+function boom(parent,x,y,r,delay){
+  const g=el('g',{transform:`translate(${x.toFixed(1)},${y.toFixed(1)})`},parent);
+  const c=el('circle',{r,class:'crater imp'},g);c.style.animationDelay=delay.toFixed(2)+'s';
+  const ring=el('circle',{r:r*1.5,class:'ring',...NSS},g);ring.style.animationDelay=delay.toFixed(2)+'s';
+}
+const BOXP=(BOX.match(/-?\d+(\.\d+)?/g)||[]).map(Number);
+function inBox(R){const u=R(),v=R(),[x0,y0,x1,y1,,,x3,y3]=BOXP;return[x0+(x1-x0)*u+(x3-x0)*v,y0+(y1-y0)*u+(y3-y0)*v];}
+const frontY=x=>{const[[a,b],[c,d]]=CFG.fxLigne;return b+(x-a)*(d-b)/(c-a);};
+function drawFx(kind,parent){
+  const R=rng(kind.length*97+7);
+  if(kind==='short'){
+    for(let i=0;i<16;i++){const[x,y]=inBox(R);boom(parent,x,y,1.8+R()*1.2,0.3+R()*1.2);}
+    for(let i=0;i<12;i++){const x=540+R()*38;boom(parent,x,frontY(x)-6-R()*14,1.8+R()*1,1.4+R()*1.2);}
+  }
+  if(kind==='carpet'){
+    for(let w=0;w<4;w++)for(let i=0;i<28;i++){const[x,y]=inBox(R);boom(parent,x,y,1.1+R()*1.1,0.3+w*0.9+R()*0.7);}
+    for(let i=0;i<18;i++){const x=CFG.fxLigne[0][0]+R()*(CFG.fxLigne[1][0]-CFG.fxLigne[0][0]);boom(parent,x,frontY(x)-5-R()*18,1.8+R()*1.2,2.6+R()*1.8);}
+    for(let i=0;i<6;i++){const[x,y]=inBox(R);const e=el('ellipse',{cx:x,cy:y,rx:12+R()*10,ry:7+R()*5,class:'smoke'},parent);e.style.animationDelay=(0.8+i*0.45)+'s';}
+  }
+  if(kind==='ponts'){
+    CFG.fxPonts.forEach(([a,b],j)=>{for(let i=0;i<14;i++){const t=R();boom(parent,a[0]+(b[0]-a[0])*t+(R()-.5)*16,a[1]+(b[1]-a[1])*t+(R()-.5)*12,1.6+R()*.8,0.8+j*.3+i*0.35);}});
+  }
+  if(kind==='roncey'||kind==='routes'){
+    const segs=CFG.fxRoutes;
+    const pick=()=>{const sg=segs[Math.floor(R()*segs.length)],t=sg[2]+(sg[3]-sg[2])*R();
+      return[sg[0][0]+(sg[1][0]-sg[0][0])*t+(R()-.5)*5,sg[0][1]+(sg[1][1]-sg[0][1])*t+(R()-.5)*5];};
+    for(let i=0;i<14;i++){const[x,y]=pick();boom(parent,x,y,2.4,0.6+i*0.42);}
+    for(let i=0;i<34;i++){const[x,y]=pick();const g=el('g',{transform:`translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${(R()*90).toFixed(0)})`,class:'imp'},parent);
+      g.style.animationDelay=(1+i*0.17).toFixed(2)+'s';el('path',{d:'M-2.6,-2.6 L2.6,2.6 M-2.6,2.6 L2.6,-2.6',class:'wreck',...NSS},g);}
+  }
+}
+
+/* chars et avions (symboliques) */
+let fxT=[];
+function later(fn,ms){fxT.push(setTimeout(fn,ms));}
+function clearFx(){fxT.forEach(clearTimeout);fxT=[];}
+function tankGlyph(parent,side,s){
+  const g=el('g',{class:'tank '+side},parent),i=el('g',{transform:`scale(${s})`},g);
+  el('rect',{x:-7,y:-4.6,width:14,height:9.2,rx:1.8,class:'hull'},i);el('path',{d:'M1.8,0 H11',class:'gun'},i);el('circle',{cx:-.8,cy:0,r:3,class:'tur'},i);return g;}
+function convoy(parent,path,side,s,o){
+  for(let k=0;k<(o.n||3);k++){
+    const g=tankGlyph(parent,side,s),loop=o.repeat==='indefinite';
+    const am=el('animateMotion',{path,dur:o.dur+'s',rotate:'auto',fill:'freeze',begin:'indefinite',repeatCount:loop?'indefinite':1},g);
+    const op=loop?el('animate',{attributeName:'opacity',values:'0;1;1;0',keyTimes:'0;.12;.82;1',dur:o.dur+'s',begin:'indefinite',repeatCount:'indefinite'},g):null;
+    if(!loop)am.addEventListener('endEvent',()=>later(()=>g.classList.remove('on'),500));
+    later(()=>{g.classList.add('on');try{am.beginElement();op&&op.beginElement();}catch(e){}},((o.begin||0)+k*(o.gap||.3))*1000);
+  }
+}
+const PL='M11,0 L8,-1.4 L2.5,-1.6 L1.2,-13 L-1.6,-13 L-2.8,-1.6 L-8.5,-1.1 L-10,-5 L-11.8,-5 L-11,0 L-11.8,5 L-10,5 L-8.5,1.1 L-2.8,1.6 L-1.6,13 L1.2,13 L2.5,1.6 L8,1.4 Z';
+function planeGlyph(parent,s,heavy){
+  const g=el('g',{class:'plane'},parent),k=s*(heavy?1.3:.85);
+  el('path',{d:PL,class:'shad',transform:`translate(${-9*s},${8*s}) scale(${k})`},g);el('path',{d:PL,class:'body',transform:`scale(${k})`},g);return g;}
+function airRaid(parent,list,s,heavy,tw,onPass){
+  (list||[]).filter(a=>a.s==='A').forEach((a,i)=>{
+    const n=a.d.match(/-?\d+(\.\d+)?/g).map(Number),x0=n[0],y0=n[1],x1=n[n.length-2],y1=n[n.length-1];
+    const L=Math.hypot(x1-x0,y1-y0)||1,ux=(x1-x0)/L,uy=(y1-y0)/L,e0=tw*.45,e1=tw*.35,tot=e0+L+e1;
+    const dur=heavy?5:2.6,reps=heavy?6:9,period=heavy?5.2:6.5;
+    (heavy?[[0,0],[-16,-13],[-16,13]]:[[0,0]]).forEach(([bx,by],k)=>{
+      const ox=(ux*bx-uy*by)*s,oy=(uy*bx+ux*by)*s;
+      const path=`M${(x0-ux*e0+ox).toFixed(1)},${(y0-uy*e0+oy).toFixed(1)} L${(x1+ux*e1+ox).toFixed(1)},${(y1+uy*e1+oy).toFixed(1)}`;
+      const g=planeGlyph(parent,s,heavy);
+      const am=el('animateMotion',{path,dur:dur+'s',rotate:'auto',begin:'indefinite'},g);
+      am.addEventListener('endEvent',()=>g.classList.remove('on'));
+      for(let w=0;w<reps;w++){const b=.5+i*.45+k*.12+w*period;
+        later(()=>{g.classList.add('on');try{am.beginElement();}catch(e){}},b*1000);
+        if(k===0&&onPass)later(()=>onPass(x1,y1),(b+dur*(e0+L)/tot)*1000);}
+    });
+  });
+}
+function passFx(kind,x,y){
+  const p=$('tfx'),R=Math.random;
+  if(kind==='carpet'){for(let i=0;i<5;i++){const[bx,by]=inBox(R);boom(p,bx,by,1.1+R()*1.1,R()*.9);}}
+  else if(kind==='short'){for(let i=0;i<4;i++)boom(p,x+(R()-.5)*22,y+(R()-.5)*14,1.6+R(),R()*.8);}
+  else{for(let i=0;i<2;i++)boom(p,x+(R()-.5)*10,y+(R()-.5)*10,1.8,R()*.4);}
+}
+function spread(u,s){
+  const ids=Object.keys(u),p=ids.map(id=>[u[id][0],u[id][1]]),ax=50*s,ay=34*s;
+  for(let it=0;it<80;it++){let moved=false;
+    for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){
+      let dx=p[j][0]-p[i][0],dy=p[j][1]-p[i][1];let d=Math.hypot(dx/ax,dy/ay);
+      if(d>=1)continue;moved=true;if(d<1e-3){dx=ax*.01;dy=0;d=.01;}
+      const f=(1-d)/(2*d)*.5;p[i][0]-=dx*f;p[i][1]-=dy*f;p[j][0]+=dx*f;p[j][1]+=dy*f;}
+    if(!moved)break;}
+  const out={};ids.forEach((id,k)=>out[id]=[p[k][0],p[k][1],u[id][2]]);return out;
+}
+
+/* fiche d'unité */
+const tip=document.createElement('div');tip.className='tip';tip.hidden=true;mapwrap.appendChild(tip);
+let pinned=null;
+function showTip(id){
+  const d=UINFO[id];if(!d)return;
+  const h=document.createElement('b');h.textContent=d[0];
+  const a=document.createElement('span');a.textContent=d[1];
+  const c=document.createElement('span');c.className='chief';c.textContent=d[2]?d[2]:'Chef non renseigné';
+  tip.replaceChildren(h,a,c);tip.hidden=false;
+  const r=U[id].getBoundingClientRect(),m=mapwrap.getBoundingClientRect();
+  let x=r.right-m.left+10;if(x+tip.offsetWidth>m.width-8)x=r.left-m.left-10-tip.offsetWidth;
+  tip.style.left=Math.max(8,x)+'px';
+  tip.style.top=Math.max(8,Math.min(r.top-m.top-4,m.height-tip.offsetHeight-8))+'px';
+}
+function hideTip(){tip.hidden=true;pinned=null;}
+for(const id in U){
+  U[id].addEventListener('pointerenter',()=>{if(!pinned)showTip(id);});
+  U[id].addEventListener('pointerleave',()=>{if(!pinned)tip.hidden=true;});
+  U[id].addEventListener('click',e=>{e.stopPropagation();if(app.classList.contains('edit'))return;if(pinned===id)hideTip();else{pinned=id;showTip(id);}});
+}
+mapwrap.addEventListener('click',()=>{if(pinned)hideTip();});
+
+function declutter(){
+  const R=e=>e.getBoundingClientRect(),obs=[];
+  const hit=r=>obs.some(o=>!(r.right<o.left-2||r.left>o.right+2||r.bottom<o.top-2||r.top>o.bottom+2));
+  const ids=Object.keys(U).filter(id=>VIS[id]);
+  ids.forEach(id=>U[id].querySelectorAll('.frame,.flag,.ech').forEach(e=>obs.push(R(e))));
+  document.querySelectorAll('#tg .mgt,#tann text,#tarrows .alab,#tfront .dlab,#tpen text').forEach(t=>{const r=R(t);if(r.width)obs.push(r);});
+  const OPT=[[21,5,'start'],[0,31,'middle'],[-38,5,'end'],[21,-15,'start'],[0,-27,'middle']];
+  ids.forEach(id=>{const t=U[id].querySelector('.ulab');let best=null;
+    for(const[x,y,a]of OPT){t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor',a);const r=R(t);if(!hit(r)){best=r;break;}}
+    if(!best){t.setAttribute('x',21);t.setAttribute('y',5);t.setAttribute('text-anchor','start');best=R(t);}
+    obs.push(best);});
+  placeEls.forEach(p=>{
+    const t=p.g.querySelector('text');p.g.classList.remove('dim');if(!R(t).width)return;
+    for(const[x,y,a]of[[6,-5,'start'],[6,17,'start'],[-6,-5,'end'],[-6,17,'end']]){t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor',a);const r=R(t);if(!hit(r)){obs.push(r);return;}}
+    t.setAttribute('x',6);t.setAttribute('y',-5);t.setAttribute('text-anchor','start');p.g.classList.add('dim');
+  });
+}
+
+let cur=0, playing=false, timer=null, showQ=true, shortOn=false;
+const SHORT=[0,1,2,3,4,6,12,13];
+const stepNext=(i,d)=>{let j=i+d;if(shortOn)while(j>=0&&j<S.length&&!SHORT.includes(j))j+=d;return j;};
+const ANS=[
+ 'La supériorité en hommes et en feux ne perce pas un terrain qui avantage le défenseur (relief, positions préparées, hiver, logistique) : il faut une autre manœuvre.',
+ 'Il juge le terrain impraticable, donc peu menacé, et l’occupe légèrement. Le risque est d’être surpris par un adversaire capable d’y passer.',
+ 'À débattre. Ici la préparation d’artillerie a eu lieu ; sa limite est qu’elle ne neutralise pas des positions minées et préparées depuis des mois.',
+ 'Analyser vite pourquoi l’attaque piétine, juger l’état de l’adversaire et relancer le lendemain plutôt que s’arrêter : c’est le choix de Juin.',
+ 'Unités qui se replient ou se désorganisent, perte d’un point clé, absence de contre-attaque coordonnée. Une défense seulement repoussée se rétablit et revient.',
+ 'Le corps de montagne n’a de valeur que dans le milieu où il change tout : on le garde en réserve jusqu’à la brèche, puis on l’engage pour exploiter.',
+ 'Une troupe, un encadrement et une logistique adaptés (mulets, autonomie) : l’obstacle jugé infranchissable devient un axe de manœuvre.',
+ 'Engagés au compte-gouttes, les renforts arrivent trop tard et sont battus séparément ; une brèche se colmate par une réponse massée et coordonnée.',
+ 'C’est difficilement mesurable : chacun fixe ou perce à son tour. Mieux vaut regarder le résultat commun que la part de chacun.',
+ 'En s’appuyant sur le terrain, en durant et en relançant : tenir face aux chars suppose cohésion, moral et soutien.',
+ 'Le droit et la discipline fondent la légitimité et la cohésion ; des violences contre les civils dégradent la valeur d’une troupe, même victorieuse.',
+ 'Des attaques simultanées empêchent l’adversaire de déplacer ses réserves d’un point à l’autre.',
+ 'À débattre : le prestige pèse politiquement, mais renoncer à détruire l’armée ennemie lui laisse le temps de se rétablir.',
+ 'L’armée française reconstituée montre qu’elle sait concevoir et mener une manœuvre décisive au sein d’une coalition.'];
+const QCM=[
+ ['Pourquoi les Allemands tiennent-ils légèrement les monts Aurunci ?','Ils les jugent infranchissables ; Juin mise sur des troupes de montagne pour les franchir.'],
+ ['Que décide Juin au soir du 12 mai ?','De relancer l’attaque dès le lendemain, jugeant la défense usée.'],
+ ['Pourquoi le corps de montagne n’est-il engagé qu’après le Majo ?','Pour l’engager une fois la brèche ouverte, dans le milieu où il change tout.'],
+ ['En quoi Diadem est-elle une victoire de coalition ?','Polonais à Cassino, Britanniques et Canadiens dans le Liri, Américains sur la côte et à Anzio : chacun fixe pendant qu’un autre perce.'],
+ ['Quel choix de Clark est contesté, et pourquoi ?','Rome plutôt que Valmontone : une partie de la 10e Armée allemande échappe à l’encerclement.']];
+/* ================= ACTES ET RÉCIT COURT ================= */
+const ACTS=[{t:'Contexte',r:[0,1]},{t:'Rupture',r:[2,4]},{t:'Montagne',r:[5,8]},{t:'Ligne Senger',r:[9,11]},{t:'Rome',r:[12,13]}];
+const ROM=['I','II','III','IV','V'];
+const BIG=[
+ {v:'3',l:'offensives brisées devant Cassino, de janvier à mars 1944'},{v:'112 000',l:'hommes au corps expéditionnaire en mai 1944'},
+ {v:'23 h',l:'le 11 mai, l’artillerie alliée ouvre le feu'},{v:'2',l:'succès locaux le 12 mai : le Faito et Castelforte'},
+ {v:'15 h 30',l:'le drapeau flotte sur le Majo, le 13 mai'},{v:'3',l:'groupements de tabors dans le corps de montagne'},
+ {v:'2 500',l:'chevaux et mulets au corps expéditionnaire'},{v:'17 mai',l:'Esperia tombe'},
+ {v:'18 mai',l:'les Polonais au Mont-Cassin'},{v:'22 mai',l:'Pico tombe'},null,
+ {v:'23 mai',l:'sortie d’Anzio et assaut de la ligne Senger'},null,{v:'4 juin',l:'les Alliés entrent dans Rome'}];
+
+const prog=$('progress'), ticks=[], segs=[];
+ACTS.forEach((a,k)=>{
+  const seg=document.createElement('div');seg.className='seg';seg.style.flexGrow=a.r[1]-a.r[0]+1;
+  const lab=document.createElement('span');lab.className='seglab';lab.textContent=`${ROM[k]}. ${a.t}`;seg.appendChild(lab);
+  const row=document.createElement('div');row.className='ticks';
+  for(let i=a.r[0];i<=a.r[1];i++){const b=document.createElement('button');b.className='tick';b.title=`${i+1}. ${S[i].t}`;b.setAttribute('aria-label',b.title);b.onclick=()=>{hideFinal();go(i);};row.appendChild(b);ticks[i]=b;}
+  seg.appendChild(row);prog.appendChild(seg);segs.push(seg);
+});
+const fseg=document.createElement('div');fseg.className='seg';fseg.style.flexGrow=1;
+fseg.innerHTML='<span class="seglab">Leçons</span><div class="ticks"><button class="tick" id="ftick" aria-label="Leçons" title="Leçons"></button></div>';
+prog.appendChild(fseg);segs.push(fseg);
+$('ftick').onclick=()=>showFinal();
+const actOf=i=>ACTS.findIndex(a=>i>=a.r[0]&&i<=a.r[1]);
+let lastAct=-1, cntT=null;
+const SW={
+ us:'<rect x="3" y="3" width="18" height="12" rx="1" style="fill:var(--us-bg);stroke:var(--us);stroke-width:1.8"/>',
+ de:'<path d="M12,1 L22,9 L12,17 L2,9Z" style="fill:var(--de-bg);stroke:var(--de);stroke-width:1.8"/>',
+ fr:'<path d="M2,9 H22" style="stroke:var(--de);stroke-width:2.4;stroke-dasharray:6 3"/>',
+ g:'<path d="M2,6 H15 L15,3 L22,9 L15,15 L15,12 H2 Z" style="fill:none;stroke:var(--us);stroke-width:1.4"/>',
+ box:'<rect x="3" y="3" width="18" height="12" style="fill:url(#hatch);stroke:var(--air);stroke-dasharray:3 2"/>',
+ air:'<path d="M2,14 L20,4" style="stroke:var(--air);stroke-width:3.5;stroke-linecap:round"/>',
+ aus:'<path d="M2,9 H18" style="stroke:var(--us);stroke-width:3.5;stroke-linecap:round"/><path d="M16,4 L22,9 L16,14Z" style="fill:var(--us)"/>',
+ ade:'<path d="M2,9 H18" style="stroke:var(--de);stroke-width:3.5;stroke-linecap:round"/><path d="M16,4 L22,9 L16,14Z" style="fill:var(--de)"/>',
+ lc:'<path d="M2,9 H22" style="stroke:var(--ink);stroke-width:1.4;stroke-dasharray:8 4 2 4"/>',
+ tank:'<g transform="translate(11,9)"><rect x="-7" y="-4.6" width="14" height="9.2" rx="1.8" style="fill:var(--us)"/><path d="M1.8,0 H11" style="stroke:var(--us);stroke-width:1.8"/><circle cx="-.8" r="3" style="fill:var(--us-bg);stroke:var(--us)"/></g>',
+ plane:'<g transform="translate(12,9) scale(.62)"><path d="'+PL+'" style="fill:var(--ink)"/></g>'};
+const swatch=k=>SW[k]||(k.startsWith('f_')?'<g transform="translate(5.5,4.7)">'+flagMarkup(k.slice(2))+'</g>':'');
+function buildLegend(){
+  const s=S[cur],items=[],tacm=s.mode==='tac',src=tacm?s:s.strat,ar=src.arrows||[];
+  const sides=tacm?Object.keys(s.u||{}).map(i=>UD[i][0]):(src.units||[]).map(u=>u.side);
+  if(sides.some(x=>x!=='C'))items.push(['us',CFG.ami]);
+  if(sides.includes('C'))items.push(['de',CFG.eni+(tacm?' (pointillés : désorganisée)':'')]);
+  const nats=[...new Set(tacm?Object.keys(s.u||{}).map(i=>UD[i][4]||CFG.sideNation[UD[i][0]]):(src.units||[]).map(u=>u.nat||CFG.sideNation[u.side]))];
+  nats.forEach(n=>items.push(['f_'+n,NATION_NAME[n]||n]));
+  if(tacm){
+    items.push(['fr',CFG.front+' à la date']);
+    if(s.front)items.push(['lc',CFG.ligneContact]);
+    if((s.g||[]).length)items.push(['g','Graphique de manœuvre APP-6']);
+    if(s.box)items.push(['box','Zone de bombardement']);}
+  if(ar.some(a=>a.s==='U'))items.push(['aus',CFG.mvtAmi]);
+  if(ar.some(a=>a.s==='C'))items.push(['ade',CFG.mvtEni]);
+  if(ar.some(a=>a.s==='A')||s.fx)items.push(['air','Action aérienne']);
+  if(ar.some(a=>a.s==='A'))items.push(['plane',CFG.avions]);
+  if(ar.some(a=>a.s!=='A'&&!a.dash)||tacm&&Object.keys(s.u||{}).some(i=>UD[i][1]==='arm'))items.push(['tank','Chars (symboliques)']);
+  if(!tacm&&src.front)items.push(['lc','Ligne Gustav']);
+  $('legbody').innerHTML=items.map(([k,t])=>`<span><svg viewBox="0 0 24 18">${swatch(k)}</svg>${t}</span>`).join('')+'<div class="legnote">Symboles APP-6 : rectangle = unité alliée, losange = unité ennemie, croix = infanterie, ellipse = blindés ; X brigade, XX division, XXX corps, XXXX armée. Positions indicatives.</div>';
+}
+$('legbtn').onclick=()=>{const b=$('legbody');b.hidden=!b.hidden;$('legbtn').setAttribute('aria-expanded',!b.hidden);};
+function countUp(el,txt){
+  clearTimeout(cntT);const m=txt.match(/^(\d+(?: \d{3})*)(.*)$/);
+  if(!m||reduce){el.textContent=txt;return;}
+  const n=+m[1].replace(/ /g,''),rest=m[2],t0=performance.now()+2800,d=1100;
+  const fmt=v=>String(v).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  el.textContent=fmt(0)+rest;
+  const tick=now=>{const k=Math.max(0,Math.min(1,(now-t0)/d));el.textContent=fmt(Math.round(n*(1-Math.pow(1-k,3))))+rest;if(k<1)requestAnimationFrame(tick);};
+  requestAnimationFrame(tick);
+}
+function updateUI(){
+  const s=S[cur],a=actOf(cur);
+  $('act').textContent=`Acte ${ROM[a]} · ${ACTS[a].t}`;
+  $('when').textContent=s.date+(s.time?', '+s.time.charAt(0).toLowerCase()+s.time.slice(1):'');
+  $('title').textContent=s.t;$('chips').replaceChildren(...s.c.map(k=>{const t=document.createElement('span');t.className='chip '+GRID[k][2];t.textContent=GRID[k][0];const m=document.createElement('small');m.textContent=GRID[k][1];t.appendChild(m);return t;}));
+  const st=$('story');st.classList.remove('enter');void st.offsetWidth;st.classList.add('enter');
+  const bg=$('big'),b=BIG[cur];bg.classList.remove('show');
+  if(b){$('bigl').textContent=b.l;countUp($('bigv'),b.v);void bg.offsetWidth;bg.classList.add('show');}
+  $('q').textContent=s.q;$('dq').textContent=s.q;
+  $('dwhen').textContent=`Étape ${cur+1} sur ${S.length} · ${s.date}`;$('dtitle').textContent=s.t;$('dnarr').textContent=NARR[cur];$('dans').textContent=ANS[cur];
+  $('tags').replaceChildren(...s.c.map(k=>{const t=document.createElement('span');t.className=GRID[k][2];t.textContent=GRID[k][0]+' · '+REF[GRID[k][1]];return t;}));
+  $('dfact').textContent=s.f||'';
+  ticks.forEach((t,k)=>{t.classList.toggle('on',k===cur&&!finalOn);t.classList.toggle('done',k<cur||finalOn);if(k===cur)t.setAttribute('aria-current','step');else t.removeAttribute('aria-current');});
+  segs.forEach((g,k)=>g.classList.toggle('on',finalOn?k===ACTS.length:k===a));
+  $('ftick').classList.toggle('on',finalOn);
+  buildLegend();
+  if(a!==lastAct&&lastAct!==-1&&!still&&!finalOn){const c=$('actcard');$('actn').textContent='Acte '+ROM[a];$('actt').textContent=ACTS[a].t;c.classList.remove('show');void c.offsetWidth;c.classList.add('show');}
+  lastAct=a;
+  afterStep();
+}
+{const L=$('lessons');L.innerHTML='<div class="h">Principe ou facteur</div><div class="h">Garigliano, 1944</div><div class="h">À retenir</div><div class="h">Pour aujourd’hui, se demander</div>';
+ LESSONS.forEach(([k,a,b,q])=>{const c=[0,1,2,3].map(()=>document.createElement('div'));c[0].className='pr';c[2].className='now';c[3].className='ask';c[3].textContent=q;
+   c[0].textContent=GRID[k][0];const m=document.createElement('small');m.textContent=REF[GRID[k][1]];c[0].appendChild(m);c[1].textContent=a;c[2].textContent=b;L.append(...c);});
+ const pl=(id,lab,cls)=>{const b=document.createElement('b');b.textContent=lab;$(id).append(b,...Object.keys(GRID).filter(k=>GRID[k][2]===cls).map(k=>{const t=document.createElement('span');t.className=cls;t.textContent=GRID[k][0];return t;}));};
+ pl('pl1','Principes de la guerre · Foch, repris par la doctrine française','p');pl('pl2','Facteurs de supériorité opérationnelle · Action terrestre future, 2016','f');pl('pl3','Clausewitz · un concept (la friction), non un principe','c');}
+function go(i,st){
+  if(!st)ctx.clearRect(0,0,cv.width,cv.height);
+  still=!!st; app.classList.toggle('still',still);
+  cur=Math.max(0,Math.min(S.length-1,i));
+  const s=S[cur], isStrat=s.mode==='strat';
+  tac.style.opacity=isStrat?0:1; strat.style.opacity=isStrat?1:0;
+  tac.style.pointerEvents=isStrat?'none':''; strat.style.pointerEvents=isStrat?'':'none';
+  hideTip();
+  const prevVIS=Object.assign({},VIS);
+  clearFx();
+  const L=['tover','ttrail','tg','tfx','tarrows','tann','sover','sann','thandles','tair'].map($);
+  L.forEach(g=>g.replaceChildren()); GH=[];
+  const [tover,ttrail,tg,tfx,tarrows,tann,sover,sann]=L;
+  placeEls.forEach(p=>{p.g.classList.remove('dim');const t=p.g.querySelector('text');t.setAttribute('y',-5);t.setAttribute('x',6);t.setAttribute('text-anchor','start');});
+  {const txt=CFG.alias.reduce((t,[re,r])=>t.replace(re,r),s.t+' '+NARR[cur]+' '+(s.f||''));
+   placeEls.forEach((p,k)=>{const n=PLACES[k][0],key=CFG.villesToujours.includes(n),cited=txt.includes(n);
+     p.g.classList.toggle('cited',cited);p.g.classList.toggle('gone',!(key||cited));});}
+
+  if(isStrat){
+    sbox=padCam(s.strat.cam||[-20,-70,920,900]);strat.setAttribute('viewBox',sbox.join(' '));
+    const ss=kFactor()/effScale(strat,sbox[2],sbox[3]);
+    SP.forEach(p=>p.g.setAttribute('transform',`translate(${p.x},${p.y}) scale(${ss})`));
+    STXT.forEach(([e,f])=>e.style.fontSize=(f*ss)+'px');
+    $('grease').querySelector('feDisplacementMap').setAttribute('scale',2*ss);
+    if(s.strat.front) el('path',{d:s.strat.front,class:'front',...NSS},sann);
+    (s.strat.zone||[]).forEach(z=>el('ellipse',{...z,class:'zone pulse',...NSS},sann));
+    arrowEls(s.strat.arrows,sover,ss,sann);
+    if(!reduce){const ap=[...sover.querySelectorAll('path.arrow')];
+      (s.strat.arrows||[]).forEach((a,i)=>{if(a.dash||a.s==='A'||!ap[i])return;const L=ap[i].getTotalLength();
+        convoy(sover,a.d,a.s,ss*.8,{n:3,dur:Math.max(2.4,L/130),repeat:'indefinite',begin:2.6+i*.3,gap:.4});});}
+    (s.strat.units||[]).forEach(u=>{const g=mkUnit(u.side,'hq',u.ech,u.lab,sann,u.e,u.nat);SUEL[u.id]=g;g.setAttribute('transform',`translate(${u.x},${u.y}) scale(${ss*.9})`);g.classList.add('fade');g.style.animationDelay='.6s';});
+    annEls(s.strat.ann,sann,ss,1);
+    for(const id in U){U[id].classList.add('gone');VIS[id]=false;}
+    zl.style.opacity=s.syn?0:1;
+    updateScale(vb);
+  }else{
+    const target=padCam(s.cam), s1=unitScale(target[2],target[3]), UT=s.u?spread(s.u,s1):{}, heavy=s.fx==='carpet'||s.fx==='short';
+    $('grease').querySelector('feDisplacementMap').setAttribute('scale',2*s1);
+    drawFronts(STEP_H[cur],s1);
+    if(s.front) el('path',{d:FRONT_T,class:'front',...NSS},tover);
+    if(s.box) el('path',{d:BOX,class:'box'+(s.pulse?' pulse':''),...NSS},tover);
+    (s.zone||[]).forEach(z=>el('ellipse',{...z,class:'zone pulse',...NSS},tover));
+    if(s.fx){if(heavy&&!still&&!reduce)later(()=>drawFx(s.fx,tfx),1700);else drawFx(s.fx,tfx);}
+    drawG(s.g,tg,s1);
+    arrowEls(s.arrows,tarrows,s1,tann);
+    annEls(s.ann,tann,s1,3);
+    if(!reduce){const tair=$('tair');
+      airRaid(tair,s.arrows,s1,heavy,target[2],(x,y)=>passFx(s.fx||'',x,y));
+      const ap=[...tarrows.querySelectorAll('path.arrow')];
+      (s.arrows||[]).forEach((a,i)=>{if(a.s==='A'||a.dash||!ap[i])return;const L=ap[i].getTotalLength();if(L<45)return;
+        convoy(tair,a.d,a.s,s1*.9,{n:3,dur:Math.max(2.2,L/(target[2]/7)),repeat:'indefinite',begin:2.8+i*.3,gap:.4});});}
+
+    // itinéraires
+    let R={};
+    if(!still){
+      for(const id in U){
+        const t=UT[id]; if(!t)continue;
+        const tgt=[t[0],t[1]], via=(s.via&&s.via[id])||[], sp=s.spawn&&s.spawn[id];
+        let start=tgt, ghost=false;
+        if(VIS[id]){start=[P[id][0],P[id][1]];ghost=true;}
+        else if(sp){start=[P[sp][0],P[sp][1]];}
+        else if(EVER[id]&&via.length){start=[P[id][0],P[id][1]];}
+        const moved=Math.hypot(start[0]-tgt[0],start[1]-tgt[1])>8;
+        R[id]={route:moved?[start,...via,tgt]:[tgt],ghost:ghost&&moved,trail:moved};
+      }
+      ROUTES[cur]=R;
+    }else R=ROUTES[cur]||{};
+    for(const id in R){
+      const r=R[id], side=UD[id][0];
+      if(r.trail){const tr=el('path',{d:pd(r.route),class:`trail ${side}`,...NSS},ttrail);}
+      if(false){const g=U[id].cloneNode(true);g.classList.remove('gone','broken');g.classList.add('ghost');ttrail.appendChild(g);GH.push({g,x:r.route[0][0],y:r.route[0][1]});}
+    }
+    const anim_={};
+    for(const id in U){
+      const t=UT[id];
+      if(t){
+        anim_[id]=still?[[t[0],t[1]]]:R[id].route;
+        U[id].classList.remove('gone');U[id].classList.toggle('broken',t[2]==='b');VIS[id]=true;EVER[id]=true;
+      }else{U[id].classList.add('gone');VIS[id]=false;}
+    }
+    if(!still){const foc=Object.keys(s.u||{}).filter(id=>(R[id]&&R[id].trail)||!prevVIS[id]);
+      const n=Object.keys(s.u||{}).length;DIM[cur]=(foc.length>0&&foc.length<n)?Object.keys(s.u).filter(id=>!foc.includes(id)):[];}
+    for(const id in U)U[id].classList.toggle('dimmed',!!(DIM[cur]&&DIM[cur].includes(id)));
+    const v0=vb.slice(), t0=performance.now();
+    const dc=(still||reduce)?0:1200, du=(still||reduce)?0:2000, dl=900;
+    if(!still&&!reduce)for(const id in R){const r=R[id];if(r.trail&&(UD[id][1]==='arm'||UD[id][1]==='mech'))convoy($('tfx'),pd(r.route),UD[id][0],s1*.85,{n:3,dur:du/1000,begin:dl/1000,gap:.2});}
+    cancelAnimationFrame(anim);
+    const frame=now=>{
+      const e=now-t0, kc=dc?Math.min(1,e/dc):1, ku=du?Math.min(1,Math.max(0,(e-dl)/du)):1;
+      const box=v0.map((v,j)=>v+(target[j]-v)*ease(kc));
+      const sc=unitScale(box[2],box[3]);
+      const pos={};
+      for(const id in U){
+        if(anim_[id]){const q=along(anim_[id],ease(ku));P[id]=[q[0],q[1]];}
+        pos[id]=P[id];
+      }
+      vb=box; applyFrame(box,sc,pos);
+      if(kc<1||ku<1) anim=requestAnimationFrame(frame); else declutter();
+    };
+    anim=requestAnimationFrame(frame);
+  }
+
+  updateUI();
+}
+/* ================= FRONTS DATÉS ================= */
+function drawFronts(h,s){
+  const tf=$('tfront'),tp=$('tpen');tf.replaceChildren();tp.replaceChildren();
+  const act=Object.keys(FR).filter(k=>h>=FR[k].h);
+  act.forEach((k,i)=>{const f=FR[k],last=i===act.length-1;
+    f.p.forEach((pts,j)=>{el('path',{d:pd(pts),class:`dfront ${f.cls}${last?'':' old'}`,...NSS},tf);
+      if(j===0&&last){const q=along(pts,.2);el('text',{x:q[0],y:q[1]-7*s,class:'dlab','font-size':12*s,'stroke-width':3.5*s,'text-anchor':'middle'},tf).textContent=CFG.front+', '+f.lab;}});
+  });
+  if(typeof PEN!=='undefined'&&PEN&&h>=PEN.de&&h<=PEN.a){
+    if(PEN.p&&h>=PEN.plein){el('path',{d:pd(PEN.p)+' Z',class:'pen',...NSS},tp);
+      el('text',{x:PEN.labXY[0],y:PEN.labXY[1],class:'mgt C','font-size':10.5*s,'stroke-width':3.5*s,'text-anchor':'middle',style:'opacity:.8'},tp).textContent=PEN.lab;}
+    if(PEN.inf25){el('path',{d:pd(PEN.inf25),class:'inf25',...NSS},tp);
+      const q=PEN.inf25[0];el('text',{x:q[0]-4*s,y:q[1]+4*s,class:'mgt U','font-size':10.5*s,'stroke-width':3.5*s,'text-anchor':'end'},tp).textContent=PEN.lab2;}
+  }
+}
+
+/* ================= NARRATION ================= */
+const NARR=[
+"Printemps 1944. En Italie, les Alliés sont bloqués depuis l'automne devant la ligne Gustav, qui barre la péninsule de l'embouchure du Garigliano jusqu'à la mer Adriatique, en passant par Cassino. Trois offensives contre Cassino ont échoué entre janvier et mars. Le débarquement d'Anzio, en janvier, devait déborder la ligne par la mer : la tête de pont reste enfermée. Le corps expéditionnaire français du général Juin combat en Italie depuis la fin de 1943. Dans les montagnes des Abruzzes, puis au Belvédère, ses tirailleurs ont montré qu'ils savaient se battre là où d'autres piétinent. En face, le maréchal Kesselring tient, avec des divisions aguerries, un terrain qui favorise le défenseur.",
+"Pour l'offensive de printemps, nommée Diadem, le général Alexander regroupe ses forces entre Cassino et la mer. Le 4 avril, Juin propose au général Clark, qui commande la 5e Armée américaine, de porter l'effort dans la montagne et de le confier au corps expéditionnaire. Les monts Aurunci, sans routes, passent pour infranchissables, et les Allemands les tiennent légèrement. Juin compte sur ses tirailleurs et sur les goumiers marocains du général Guillaume, avec leurs mulets. Le corps compte alors environ 112 000 hommes, dont 60 % de Maghrébins encadrés par des officiers français. Le plan est simple : percer au Majo, puis déborder par la montagne vers Pico, sur les arrières de la défense de la vallée du Liri.",
+"Le 11 mai 1944, à 23 heures, l'artillerie alliée ouvre le feu sur tout le front, de Cassino à la mer : mille six cents pièces selon les sources américaines. Dans la tête de pont du Garigliano, le corps expéditionnaire attaque aussitôt. La 2e division d'infanterie marocaine du général Dody doit enlever le mont Faito, puis le Majo, clé de la position. Au nord, la 1re division de marche attaque vers la Cerasola et le Girofano. Au sud, la 3e division d'infanterie algérienne du général de Monsabert vise Castelforte. En face, la 71e division d'infanterie allemande tient des positions fortifiées, minées et préparées depuis des mois. La surprise est réelle : le général von Senger, qui commande le secteur, est en permission.",
+"Le 12 mai, l'attaque piétine. Les tirailleurs marocains prennent le Faito, et la 3e division algérienne enlève le village de Castelforte. Ailleurs, sur la Cerasola et le Girofano, les assauts se brisent sur les champs de mines et les armes automatiques. Les positions, minées et préparées depuis des mois, résistent malgré l'artillerie, et les pertes sont lourdes. Le soir, sur tout le front allié, rien n'est encore percé. Juin juge pourtant que la défense allemande est usée, et décide de relancer l'attaque dès le lendemain matin. La friction est partout ; la décision tient à la lecture qu'en fait le chef.",
+"Le 13 mai, la défense allemande cède. Vers 14 heures, le Girofano est nettoyé. Vers 15 h 30, les tirailleurs marocains de la 2e division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde. La ligne Gustav est rompue sur le front du corps expéditionnaire. La 71e division allemande, à bout de réserves, se replie vers l'ouest. Les Alliés voisins, Américains sur la côte et Britanniques dans la vallée du Liri, progressent encore difficilement : la brèche française devient un point décisif de l'offensive.",
+"Juin exploite sans attendre. Le 14 mai, ses divisions nettoient la rive gauche de l'Ausente et marchent sur Ausonia. Le 15, elles forcent l'entrée du massif de la Petrella, à Castello. Juin engage alors son corps de montagne : la 4e division marocaine de montagne et trois groupements de tabors marocains. Ils doivent traverser les monts Aurunci, là où les Allemands n'attendent personne. En agissant plus vite que l'adversaire ne peut se rétablir, Juin conserve la liberté d'action que la rupture lui a donnée.",
+"Du 15 au 17 mai, goumiers et tirailleurs de montagne s'enfoncent dans un massif sans routes, presque sans sentiers. Les mulets portent les armes lourdes, les munitions et l'eau. Les colonnes franchissent la Petrella et poussent vers le mont Revole, pour tomber sur les arrières d'Esperia, du Monte d'Oro et de Pico. Les Allemands, qui croyaient le massif infranchissable, voient surgir des troupes là où ils n'avaient laissé que des postes. Une troupe adaptée à son milieu transforme un obstacle en axe de manœuvre.",
+"Le 17 mai, Esperia tombe. Menacée d'être prise à revers par les colonnes de montagne, la défense allemande ne peut plus tenir la vallée. Le commandement allemand engage ses renforts par fractions, à mesure qu'ils arrivent : trop tard et trop dispersés pour colmater la brèche. Pendant ce temps, sur la côte, le 2e corps américain avance à son tour vers Formia et Itri. La manœuvre par la montagne a fait sauter la charnière de la défense.",
+"Le 18 mai, au nord, les soldats du 2e corps polonais occupent les ruines de l'abbaye du Mont-Cassin, que les parachutistes allemands viennent d'évacuer. Dans la vallée du Liri, la 8e Armée britannique progresse. Le débordement français par le sud a contribué à rendre la position de Cassino intenable. Les Allemands se replient sur leur deuxième ligne, la ligne Hitler, rebaptisée ligne Senger, de Pontecorvo à Aquino, avec Pico au sud. La victoire de Diadem est une victoire de coalition : chaque corps fixe l'adversaire pendant qu'un autre perce.",
+"Pico, verrou de la ligne Senger au sud, est défendu avec acharnement. Le corps expéditionnaire y livre de durs combats. Le 22 mai, Pico tombe enfin. Du 23 au 25 mai, la 26e Panzerdivision contre-attaque encore pour reprendre le terrain. Face à des chars, l'infanterie française doit durer, tenir et relancer. La prise de Pico ouvre le flanc sud de la ligne Senger.",
+"Avant de poursuivre, il faut regarder ce que cette progression a coûté aux civils. Entre avril et juin 1944, des soldats du corps expéditionnaire, notamment des goumiers selon les sources, commettent des viols, des meurtres et des pillages contre les civils du sud du Latium, la Ciociaria. Les estimations varient : de deux à trois mille victimes selon le ministère italien de la Défense en 1997, plusieurs milliers de viols selon l'historienne Julie Le Gac, davantage selon les associations de victimes. Selon les sources disponibles, 207 militaires sont traduits devant des tribunaux militaires français et 156 condamnés. Ces crimes sont le fait d'individus et ne sauraient être attribués à un groupe tout entier. Les Italiens appellent ces crimes les marocchinate. Ils rappellent que la discipline et le respect du droit font partie de la valeur d'une troupe, au même titre que son efficacité au combat.",
+"Le 23 mai, les Alliés attaquent la ligne Senger. Les Canadiens enlèvent Pontecorvo au cours des 23 et 24 mai. Le 23, le 6e corps américain sort enfin de la tête de pont d'Anzio. La 10e Armée allemande doit se replier vers le nord, par la vallée du Liri et les monts Ausoni. Le corps expéditionnaire continue de manœuvrer par les hauteurs, débordant chaque position par la montagne. La défense allemande au sud de Rome s'effondre.",
+"Le général Alexander voulait que les forces sorties d'Anzio coupent à Valmontone la route de repli de la 10e Armée allemande. Fin mai, le général Clark oriente l'essentiel de son effort vers Rome. Une partie des divisions allemandes échappe ainsi à l'encerclement et ira se rétablir plus au nord. Le corps expéditionnaire, lui, poursuit par les monts au sud-est de Rome. Détruire l'armée ennemie, ou prendre la capitale : c'est le grand débat de cette fin de bataille.",
+"Le 4 juin 1944, les Alliés entrent dans Rome. Le 5, le général Clark fait son entrée dans la ville, accompagné de ses commandants de corps, parmi lesquels le général Juin. Le corps expéditionnaire participe ainsi à la libération de la capitale. Deux jours plus tard, le débarquement de Normandie relègue l'Italie au second plan. Au Garigliano, l'armée française renaissante a montré qu'elle savait concevoir et réussir une manœuvre décisive au sein d'une coalition. Surprise, exploitation par la montagne, rythme maintenu : la victoire tient à la compréhension du terrain et à l'audace de son chef."];
+const CALL=[
+ [{k:'ligne Gustav',strat:LL(14.1,41.75),t:'La ligne Gustav',d:'Du Garigliano à l’Adriatique, par Cassino.',p:'Endurance'},{k:'Anzio',strat:LL(12.63,41.45),t:'Anzio enfermé',d:'La tête de pont de janvier reste bloquée.',p:'Friction'},{k:'Belvédère',strat:LL(13.95,41.33),t:'Le CEF aguerri',d:'Abruzzes, puis Belvédère, l’hiver 1943-1944.',p:'Force morale'}],
+ [{k:'4 avril',xy:[396,262],t:'Le plan Juin',d:'Porter l’effort dans la montagne.',p:'Concentration des efforts'},{k:'infranchissables',xy:[215,330],t:'Un massif jugé infranchissable',d:'Les Allemands le tiennent légèrement.',p:'Compréhension'},{k:'112 000',xy:[418,330],t:'112 000 hommes',d:'Dont 60 % de Maghrébins.',p:'Masse'}],
+ [{k:'23 heures',xy:[340,315],t:'23 h : le feu',d:'Sur tout le front, de Cassino à la mer.',p:'Masse'},{k:'Dody',xy:[378,338],t:'Objectif : le Majo',d:'La clé de la position.',p:'Concentration des efforts'},{k:'permission',xy:[328,312],t:'Von Senger absent',d:'Le chef du secteur est en permission.',p:'Liberté d’action'}],
+ [{k:'Castelforte',xy:[354,358],t:'Deux succès locaux',d:'Le Faito et Castelforte.',p:'Liberté d’action'},{k:'se brisent',xy:[378,284],t:'Assauts brisés',d:'Mines et armes automatiques.',p:'Friction'},{k:'relancer',xy:[396,262],t:'Juin relance',d:'La défense est usée.',p:'Performance du commandement'}],
+ [{k:'14 heures',xy:[361,305],t:'Girofano nettoyé',d:'Vers 14 h.',p:'Liberté d’action'},{k:'drapeau tricolore',xy:[322,315],t:'Drapeau sur le Majo',d:'Trente mètres carrés, vers 15 h 30.',p:'Force morale'},{k:'point décisif',xy:[300,322],t:'La brèche française',d:'Un point décisif de Diadem.',p:'Concentration des efforts'}],
+ [{k:'Ausente',xy:[302,340],t:'L’Ausente nettoyé',d:'Le 14 mai.',p:'Liberté d’action'},{k:'Castello',xy:[270,330],t:'Entrée du massif',d:'Le 15 mai, à Castello.',p:'Agilité'},{k:'corps de montagne',xy:[296,364],t:'Le corps de montagne',d:'4e DMM et trois groupements de tabors.',p:'Agilité'}],
+ [{k:'mulets',xy:[205,326],t:'Mulets et brêles',d:'Armes, munitions et eau à dos de mulet.',p:'Endurance'},{k:'mont Revole',xy:[175,300],t:'Vers le mont Revole',d:'Sur les arrières d’Esperia et de Pico.',p:'Liberté d’action'},{k:'axe de manœuvre',xy:[217,333],t:'L’obstacle devient un axe',d:'Une troupe adaptée à son milieu.',p:'Agilité'}],
+ [{k:'Esperia tombe',xy:[238,263],t:'Esperia, 17 mai',d:'Prise à revers par la montagne.',p:'Liberté d’action'},{k:'par fractions',xy:[214,244],t:'Renforts par fractions',d:'Trop tard et trop dispersés.',p:'Économie des moyens'},{k:'Formia',xy:[172,404],t:'Les Américains sur la côte',d:'Vers Formia et Itri.',p:'Coopération'}],
+ [{k:'2e corps polonais',xy:[384,134],t:'Le Mont-Cassin',d:'Occupé par les Polonais le 18 mai.',p:'Coopération'},{k:'ligne Senger',xy:[223,181],t:'La ligne Senger',d:'De Pontecorvo à Aquino, avec Pico au sud.',p:'Endurance'}],
+ [{k:'22 mai',xy:[134,189],t:'Pico, 22 mai',d:'Après de durs combats.',p:'Masse'},{k:'26e Panzerdivision',xy:[124,172],t:'Contre-attaques blindées',d:'Du 23 au 25 mai.',p:'Endurance'}],
+ [{k:'estimations',xy:[200,255],t:'Des chiffres débattus',d:'De 2 000 à plusieurs milliers de victimes selon les sources.',p:'Force morale'},{k:'discipline',xy:[238,263],t:'Discipline et droit',d:'Une part de la valeur d’une troupe.',p:'Performance du commandement'}],
+ [{k:'Pontecorvo',xy:[223,181],t:'Pontecorvo, 23-24 mai',d:'Pris par les Canadiens.',p:'Coopération'},{k:'Anzio',xy:[-58,55],t:'Sortie d’Anzio',d:'Le 6e corps américain, le même jour.',p:'Coopération'}],
+ [{k:'Valmontone',strat:LL(12.92,41.78),t:'Le plan Alexander',d:'Couper la retraite allemande à Valmontone.',p:'Concentration des efforts'},{k:'vers Rome',strat:LL(12.5,41.9),t:'Le choix de Clark',d:'Rome plutôt que l’encerclement.',p:'Liberté d’action'}],
+ [{k:'libération de la capitale',strat:LL(12.5,41.9),t:'Les Français à Rome',d:'Le corps expéditionnaire à la libération de la capitale.',p:'Force morale'},{k:'Normandie',strat:LL(13.0,41.72),t:'Normandie, 6 juin',d:'L’Italie passe au second plan.',p:'Compréhension'}]];
+
+const sentences=t=>t.replace(/([.!?])\s+(?=[A-ZÀ-ÖØ-Ý0-9])/g,'$1\u0001').split('\u0001');
+
+/* faits saillants */
+const callL=$('callouts'),callS=$('callsvg');let callTimers=[],shownCall=[],stepT0=0;
+let liveCall=[];
+function clearCallouts(){callTimers.forEach(clearTimeout);callTimers=[];callL.replaceChildren();callS.replaceChildren();shownCall=[];liveCall=[];}
+function retire(r){if(!liveCall.includes(r))return;liveCall=liveCall.filter(x=>x!==r);r.box.classList.add('out');r.g.classList.add('out');setTimeout(()=>{r.box.remove();r.g.remove();},500);}
+/* surbrillance des unités citées */
+const HL=[
+ [/1re division de marche/,['dmi1']],[/2e division d'infanterie marocaine|2e division|tirailleurs marocains|Dody/,['dim2']],
+ [/3e division (d'infanterie )?algérienne|Monsabert/,['dia3']],[/4e division marocaine de montagne|corps de montagne|tirailleurs de montagne/,['dmm4']],
+ [/goumiers|tabors|Guillaume/,['gtm']],[/2e corps polonais/,['pol2']],[/Canadiens/,['can1']],
+ [/71e division/,['d71']],[/26e Panzerdivision/,['pz26']],[/parachutistes allemands/,['fj1']],
+ [/corps expéditionnaire|Juin/,['cef','cef2']],[/Anzio/,['us6','us6b']],[/8e Armée/,['uk8']],[/2e corps américain/,['us2']],
+ [/10e Armée/,['de10','de10b']],[/Kesselring/,['de10','de14']]];
+
+function hlText(txt){
+  const ids=new Set();HL.forEach(([re,l])=>{if(re.test(txt))l.forEach(i=>ids.add(i));});
+  ids.forEach(id=>{const g=U[id]&&VIS[id]?U[id]:SUEL[id]&&SUEL[id].isConnected?SUEL[id]:null;if(!g)return;
+    g.classList.remove('hl');void g.getBBox();g.classList.add('hl');clearTimeout(g._hl);g._hl=setTimeout(()=>g.classList.remove('hl'),3500);});
+}
+function prepCallouts(){
+  clearCallouts();stepT0=performance.now();
+  const L=CALL[cur]||[],ss=sentences(NARR[cur]);
+  L.forEach(c=>{c._si=Math.max(0,ss.findIndex(x=>x.includes(c.k)));});
+  if(!(playing&&canSpeak()))L.forEach((c,i)=>callTimers.push(setTimeout(()=>showCallout(c),reduce?0:3300+i*1700)));
+}
+function triggerCallouts(si){(CALL[cur]||[]).forEach(c=>{if(c._si===si&&!shownCall.includes(c)){callTimers.push(setTimeout(()=>showCallout(c),Math.max(0,1500-(performance.now()-stepT0))));}});}
+function anchorPx(c){const svg=c.strat?strat:tac,[x,y]=c.strat||c.xy,m=svg.getScreenCTM();return[m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f];}
+function showCallout(c){
+  if(shownCall.includes(c)||finalOn)return;shownCall.push(c);
+  if(!(playing&&canSpeak()))hlText(sentences(NARR[cur])[c._si]||'');
+  while(liveCall.length>=2)retire(liveCall[0]);
+  if(innerWidth<820){callL.replaceChildren();callS.replaceChildren();}
+  const[ax,ay]=anchorPx(c),W=innerWidth,H=innerHeight;
+  const box=document.createElement('div');box.className='call';box.innerHTML='<span class="cp"></span><b></b><p></p>';
+  box.querySelector('.cp').textContent=c.p;box.querySelector('b').textContent=c.t;box.querySelector('p').textContent=c.d;
+  box.style.visibility='hidden';callL.appendChild(box);
+  const bw=box.offsetWidth,bh=box.offsetHeight,x0=16,x1=W-16,y0=80,y1=Math.min(H-40,$('story').getBoundingClientRect().top-12);
+  const rects=[...callL.querySelectorAll('.call:not(.out)')].filter(e=>e!==box).map(e=>e.getBoundingClientRect()).concat([...document.querySelectorAll('#tann .ann,#sann .ann,#tunits .unit:not(.gone) .frame,#sann .unit .frame')].map(e=>e.getBoundingClientRect()).filter(r=>r.width));
+  let pos=null;
+  for(const[dx,dy]of[[44,-bh-46],[-bw-44,-bh-46],[60,-bh/2],[-bw-60,-bh/2],[44,36],[-bw-44,36]]){
+    const x=ax+dx,y=ay+dy;if(x<x0||x+bw>x1||y<y0||y+bh>y1)continue;
+    if(rects.some(r=>!(x+bw+8<r.left||x>r.right+8||y+bh+8<r.top||y>r.bottom+8)))continue;pos=[x,y];break;}
+  if(!pos)pos=[Math.min(Math.max(ax+44,x0),x1-bw),Math.min(Math.max(ay-bh-46,y0),y1-bh)];
+  box.style.left=pos[0]+'px';box.style.top=pos[1]+'px';box.style.visibility='';
+  const cx=Math.max(pos[0],Math.min(ax,pos[0]+bw)),cy=Math.max(pos[1],Math.min(ay,pos[1]+bh));
+  const g=el('g',{class:'cg'},callS);el('line',{x1:ax,y1:ay,x2:cx,y2:cy,class:'cline'},g);el('circle',{cx:ax,cy:ay,r:5,class:'cdot'},g);
+  const r={c,box,g};liveCall.push(r);callTimers.push(setTimeout(()=>retire(r),6000/(speedF||1)));
+}
+
+/* voix et lecture : la voix suit lecture et pause */
+/* prononciation : réécriture phonétique appliquée uniquement à ce qui est lu (l'écran garde l'orthographe) */
+const PRON=[
+ /* noms italiens : prononciation italienne transcrite pour une voix française.
+    gl = « li », gn = « gn », c devant e ou i = « tch », e final prononcé « é ». */
+ [/Garigliano/g,'Gari-liano'],                /* ɡariʎˈʎaːno */
+ [/Majo/g,'Maïo'],                            /* ˈmaːjo */
+ [/Faito/g,'Faïto'],                          /* ˈfaːito */
+ [/Girofano/g,'Djirofano'],                   /* dʒiˈrɔːfano */
+ [/Cerasola/g,'Tchérasola'],                  /* tʃeˈraːzola */
+ [/Castelforte/g,'Castèl-forté'],             /* kastelˈfɔrte */
+ [/Ausonia/g,'Aou-zonia'],                    /* auˈzɔːnja */
+ [/Ausente/g,'Aou-zennté'],                   /* auˈzɛnte */
+ [/Aurunci/g,'Aou-roun-tchi'],                /* auˈruntʃi */
+ [/Ausoni/g,'Aou-zoni'],                      /* auˈzoːni */
+ [/Esperia/g,'Espéria'],                      /* esˈpɛːrja */
+ [/Petrella/g,'Pétrèlla'],                    /* peˈtrɛlla */
+ [/Revole/g,'Rèvolé'],                        /* ˈrɛːvole */
+ [/Monte d'Oro/g,'Monnté Doro'],              /* ˈmonte ˈdɔːro */
+ [/Castello/g,'Castèllo'],
+ [/Pontecorvo/g,'Ponnté-corvo'],              /* ponteˈkɔrvo */
+ [/Valmontone/g,'Valmonn-toné'],              /* valmonˈtoːne */
+ [/Ciociaria/g,'Tcho-tchiaria'],              /* tʃotʃaˈriːa */
+ [/marocchinate/g,'marokinaté'],              /* marokkiˈnaːte */
+ [/Anzio/g,'Anntsio'],                        /* ˈantsjo */
+ [/Gaeta/g,'Gaéta'],[/Farnèse/g,'Farnèze'],
+ /* noms allemands */
+ [/von Senger/g,'fonne Zèngueur'],[/Senger/g,'Zèngueur'],  /* ˈzɛŋɐ */
+ [/Kesselring/g,'Kèsseul-ring'],              /* ˈkɛsl̩ʁɪŋ */
+ [/Panzerdivision/g,'Pann-tseur-division'],[/Panzer/g,'Pann-tseur'], /* ˈpant͡sɐ */
+ /* noms anglais */
+ [/Alexander/g,'Alèxandeur'],[/Diadem/g,'Daïadem'],     /* ˈdaɪədɛm */
+ /* sigles */
+ [/(\d+) %/g,'$1 pour cent']];
+
+/* nombres : heures et ordinaux écrits en toutes lettres, pour que la voix fasse les bonnes liaisons */
+const NU=['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+function num(n){
+  if(n<17)return NU[n]; if(n<20)return 'dix-'+NU[n-10];
+  if(n<100){const d=Math.floor(n/10),u=n%10,T=['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+    if(d===7||d===9)return T[d]+(d===7&&u===1?' et ':'-')+num(10+u);
+    return T[d]+(u===0?(d===8?'s':''):u===1&&d<8?' et un':'-'+NU[u]);}
+  const c=Math.floor(n/100),r=n%100;return (c>1?NU[c]+' cent':'cent')+(r?' '+num(r):(c>1?'s':''));
+}
+function ordinal(n,suf){
+  if(n===1)return suf==='re'?'première':'premier';
+  const w=num(n).replace(/(cent|vingt)s$/,'$1');
+  if(/un$/.test(w))return w+'ième'; if(/cinq$/.test(w))return w+'uième'; if(/neuf$/.test(w))return w.slice(0,-1)+'vième';
+  if(/e$/.test(w))return w.slice(0,-1)+'ième'; return w+'ième';
+}
+const spoken=t=>PRON.reduce((s,[re,r])=>s.replace(re,r),t)
+  .replace(/\b(\d{1,2}) h (\d{1,2})\b/g,(_,h,m)=>num(+h)+(+h>1?' heures ':' heure ')+num(+m))
+  .replace(/\b(\d{1,3})(er|re|e)\b/g,(_,n,s)=>ordinal(+n,s));
+const synth=window.speechSynthesis;
+let voiceOn=true,vlist=[],vpick=null,speakTok=0,sentIdx=0,subsOn=true,speedF=1,cps=15;
+let stepT=null,stepStart=0,stepRemain=null,wasPlaying=false,finalOn=false;
+const INTRO=1.2,OUTRO=1.6;
+const vscore=v=>(/natural|online|neural/i.test(v.name)?10:0)+(/fr[-_]FR/i.test(v.lang)?3:0);
+const canSpeak=()=>voiceOn&&!!synth&&vlist.length>0;
+function loadVoices(){
+  if(!synth)return;vlist=synth.getVoices().filter(v=>/^fr/i.test(v.lang)).sort((a,b)=>vscore(b)-vscore(a));
+  const sel=$('vsel');sel.replaceChildren(...vlist.map(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name.replace(/^(Microsoft|Google)\s+/,'').replace(/\s*Online \(Natural\)\s*-?\s*/,' ').slice(0,38);return o;}));
+  let saved=null;try{saved=localStorage.getItem(CFG.voixKey);}catch(e){}
+  vpick=vlist.find(v=>v.name===saved)||vlist[0]||null;if(vpick)sel.value=vpick.name;sel.hidden=!vlist.length||!voiceOn;
+}
+if(synth){loadVoices();synth.onvoiceschanged=loadVoices;
+  /* iOS : voiceschanged n'est pas toujours émis ; on réinterroge quelques secondes */
+  let tries=0;const poll=setInterval(()=>{if(vlist.length||++tries>20){clearInterval(poll);return}loadVoices()},500);}
+const IOS=/iP(hone|ad|od)/.test(navigator.platform)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)||/iPhone|iPad/.test(navigator.userAgent);
+let speechUnlocked=false;
+function unlockSpeech(){ /* à appeler dans le geste : iOS n'autorise la voix qu'après une action de l'utilisateur */
+  if(synth&&!speechUnlocked){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='fr-FR';synth.speak(u);speechUnlocked=true}catch(e){}}
+  if(synth&&synth.paused)try{synth.resume()}catch(e){}
+}
+function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,4000);}
+function showSub(t){const n=$('narr');n.textContent=t;n.hidden=!subsOn;}
+function refreshSub(){showSub(playing&&canSpeak()?'':NARR[cur]);}
+const estStep=i=>NARR[i].length/cps+INTRO+OUTRO;
+function upTotal(){const t=(shortOn?SHORT:NARR.map((_,i)=>i)).reduce((a,i)=>a+estStep(i),0)/speedF;$('total').textContent=`≈ ${Math.round(t/60)} min au total`;}
+function hold(){
+  clearTimeout(stepT);
+  if(stepStart){stepRemain=Math.max(0,stepRemain-(performance.now()-stepStart));stepStart=0;}
+  speakTok++;if(synth)synth.cancel();
+}
+function runStep(){
+  clearTimeout(stepT);if(!playing||finalOn)return;
+  if(canSpeak()){narrate(sentIdx);return;}
+  const ms=stepRemain??estStep(cur)*1000/speedF;stepRemain=ms;stepStart=performance.now();
+  stepT=setTimeout(()=>{stepStart=0;if(playing)next();},ms);
+}
+function narrate(from){
+  const tok=++speakTok,ss=sentences(NARR[cur]);let i=from||0;synth.cancel();
+  const say=()=>{
+    if(tok!==speakTok)return;
+    if(i>=ss.length){sentIdx=ss.length;stepT=setTimeout(()=>{if(tok===speakTok&&playing)next();},OUTRO*1000/speedF);return;}
+    const k=i++,u=new SpeechSynthesisUtterance(spoken(ss[k]));u.lang='fr-FR';if(vpick)u.voice=vpick;u.rate=Math.min(2,speedF);
+    let t0=0;
+    u.onstart=()=>{if(tok!==speakTok)return;sentIdx=k;t0=performance.now();showSub(ss[k]);hlText(ss[k]);triggerCallouts(k);};
+    let done=false,dog2=null;const fin=()=>{if(done||tok!==speakTok)return;done=true;clearTimeout(dog);clearTimeout(dog2);say();};
+    /* garde-fou : sur iOS, onend n'est parfois jamais émis */
+    const dog=setTimeout(()=>{if(tok!==speakTok||!playing)return;if(!synth.speaking)fin();else dog2=setTimeout(fin,4000);},(ss[k].length/9+4)*1000/Math.max(.5,speedF));
+    u.onend=()=>{if(tok!==speakTok)return;if(t0){const dt=(performance.now()-t0)/1000;if(dt>1){cps=cps*.8+(ss[k].length/dt/u.rate)*.2;upTotal();}}fin();};
+    u.onerror=e=>{if(tok!==speakTok||e.error==='interrupted'||e.error==='canceled')return;fin();};
+    synth.speak(u);
+  };
+  stepT=setTimeout(say,from?(IOS?300:250):INTRO*1000/speedF);
+}
+function setPlay(v){
+  if(v&&finalOn)v=false;
+  playing=v;const b=$('play');b.setAttribute('aria-pressed',v);b.textContent=v?'❚❚':'▶';b.setAttribute('aria-label',v?'Pause':'Lecture');b.title=v?'Pause (espace)':'Lecture (espace)';
+  if(v){
+    if(voiceOn&&!canSpeak())toast('Aucune voix française sur ce poste : lecture sans voix.');
+    if(canSpeak()){callTimers.forEach(clearTimeout);callTimers=[];}
+    runStep();
+  }else hold();
+  refreshSub();
+}
+function setVoice(on){
+  if(on&&!(synth&&vlist.length)){toast('Aucune voix française n’est disponible sur ce poste.');on=false;}
+  hold();voiceOn=on;$('vbtn').setAttribute('aria-pressed',on);$('vsel').hidden=!on||!vlist.length;
+  refreshSub();
+  stepRemain=null;
+  if(playing)runStep();
+}
+$('vbtn').onclick=()=>setVoice(!voiceOn);
+$('vsel').onchange=e=>{vpick=vlist.find(v=>v.name===e.target.value)||vpick;try{localStorage.setItem(CFG.voixKey,vpick.name);}catch(err){}if(playing&&canSpeak()){hold();runStep();}};
+function afterStep(){
+  if(finalOn){clearCallouts();hold();return;}
+  if(still){const keep=liveCall.map(r=>r.c);clearCallouts();requestAnimationFrame(()=>requestAnimationFrame(()=>keep.forEach(showCallout)));return;}
+  hold();sentIdx=0;stepRemain=null;stepStart=0;refreshSub();
+  prepCallouts();
+  if(playing)runStep();
+}
+
+/* ================= COMMANDES ================= */
+function showFinal(){finalOn=true;setPlay(false);clearCallouts();app.classList.add('finalon');$('final').hidden=false;$('qov').hidden=true;updateUI();}
+function hideFinal(){if(!finalOn)return;finalOn=false;app.classList.remove('finalon');$('final').hidden=true;}
+function next(){if(finalOn)return;const j=stepNext(cur,1);if(j>=S.length)showFinal();else go(j);}
+function prev(){if(finalOn){hideFinal();go(S.length-1);return;}const j=stepNext(cur,-1);if(j>=0)go(j);}
+const speed=$('speed');
+speed.onchange=()=>{hold();speedF=+speed.value||1;stepRemain=null;upTotal();if(playing)runStep();};upTotal();
+$('prevb').onclick=prev;$('nextb').onclick=next;$('play').onclick=()=>{if(!playing){unlockSpeech();loadVoices();}setPlay(!playing);};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing){setPlay(false);}});
+function toggleQ(){
+  const q=$('qov');q.hidden=!q.hidden;$('qbtn').setAttribute('aria-pressed',!q.hidden);
+  if(!q.hidden){wasPlaying=playing;if(playing)setPlay(false);q.tabIndex=-1;q.focus();}else{$('qbtn').focus();if(wasPlaying){wasPlaying=false;setPlay(true);}}
+}
+function toggleI(){const d=$('drawer');d.hidden=!d.hidden;$('ibtn').setAttribute('aria-pressed',!d.hidden);(d.hidden?$('ibtn'):$('dclose')).focus();}
+function toggleS(){subsOn=!subsOn;$('sbtn').setAttribute('aria-pressed',subsOn);refreshSub();}
+$('shortb').onclick=()=>{shortOn=!shortOn;$('shortb').setAttribute('aria-pressed',shortOn);ticks.forEach((t,k)=>t.classList.toggle('skip',shortOn&&!SHORT.includes(k)));upTotal();if(shortOn&&!SHORT.includes(cur))go(stepNext(cur,1));};
+$('again').onclick=()=>{hideFinal();go(0);};
+$('qz').replaceChildren(...QCM.map(([q,a])=>{const d=document.createElement('details'),m=document.createElement('summary'),p=document.createElement('p');m.textContent=q;p.textContent=a;d.append(m,p);return d;}));
+$('qbtn').onclick=toggleQ;$('qov').onclick=toggleQ;$('ibtn').onclick=toggleI;$('dclose').onclick=toggleI;$('sbtn').onclick=toggleS;
+if(!(document.fullscreenEnabled||document.webkitFullscreenEnabled))app.classList.add('no-fs');
+$('fs').onclick=()=>{const a=$('app');if(!(document.fullscreenElement||document.webkitFullscreenElement)){(a.requestFullscreen||a.webkitRequestFullscreen)?.call(a);}else (document.exitFullscreen||document.webkitExitFullscreen)?.call(document);};
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(e.key===' '&&e.target.tagName==='BUTTON')return;
+  const k=e.key.toLowerCase();
+  if(e.key===' '||k==='p'){e.preventDefault();$('play').click();}
+  else if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+  else if(e.key==='Home'){hideFinal();go(0);} else if(e.key==='End')showFinal();
+  else if(e.key==='Escape'){if(!$('qov').hidden)toggleQ();if(!$('drawer').hidden)toggleI();}
+  else if(k==='q')toggleQ(); else if(k==='i')toggleI(); else if(k==='s')toggleS();
+  else if(k==='f')$('fs').click(); else if(k==='d')$('penbtn').click(); else if(k==='v')$('vbtn').click();
+});
+let uiT=null;
+function poke(){app.classList.add('ui');clearTimeout(uiT);uiT=setTimeout(()=>{if(!$('controls').matches(':hover'))app.classList.remove('ui');},2800);}
+document.addEventListener('pointermove',poke);document.addEventListener('pointerdown',poke);document.addEventListener('keydown',poke);poke();
+strat.setAttribute('viewBox','-20 -70 920 900');
+
+// annotation libre
+const cv=$('pen'),ctx=cv.getContext('2d');
+let pen=false,drawing=false;
+function resize(){
+  const r=mapwrap.getBoundingClientRect();
+  const old=cv.width&&cv.height?document.createElement('canvas'):null;
+  if(old){old.width=cv.width;old.height=cv.height;old.getContext('2d').drawImage(cv,0,0);}
+  cv.width=Math.max(1,r.width*devicePixelRatio);cv.height=Math.max(1,r.height*devicePixelRatio);
+  if(old)ctx.drawImage(old,0,0,cv.width,cv.height);
+  if(S[cur].mode!=='strat'){const sc=unitScale(vb[2],vb[3]);applyFrame(vb,sc,P);}else updateScale(vb);
+  if(!rzFirst){clearTimeout(rzT);rzT=setTimeout(()=>go(cur,true),250);}
+  rzFirst=false;
+}
+let rzT=null, rzFirst=true;
+new ResizeObserver(resize).observe(mapwrap);
+$('penbtn').onclick=()=>{pen=!pen;mapwrap.classList.toggle('penon',pen);$('penbtn').setAttribute('aria-pressed',pen);};
+$('clear').onclick=()=>ctx.clearRect(0,0,cv.width,cv.height);
+const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*devicePixelRatio,(e.clientY-r.top)*devicePixelRatio];};
+cv.addEventListener('pointerdown',e=>{if(!pen)return;drawing=true;cv.setPointerCapture(e.pointerId);const[x,y]=pt(e);ctx.beginPath();ctx.moveTo(x,y);
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--air').trim()||'#D99A0B';ctx.globalAlpha=.85;ctx.lineWidth=6*devicePixelRatio;ctx.lineCap='round';ctx.lineJoin='round';});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;const[x,y]=pt(e);ctx.lineTo(x,y);ctx.stroke();});
+cv.addEventListener('pointerup',()=>drawing=false);
+
+// balayage tactile
+let sx=null;
+mapwrap.addEventListener('pointerdown',e=>{if(!pen)sx=e.clientX;});
+mapwrap.addEventListener('pointercancel',()=>{sx=null});
+mapwrap.addEventListener('pointerup',e=>{if(sx===null||pen)return;const dx=e.clientX-sx;if(Math.abs(dx)>60){dx<0?next():prev();}sx=null;});
+
+go(0);
+document.getElementById('nojs')?.remove();
+})();
+</script>
+</body>
+</html>
+
+</body></html>
