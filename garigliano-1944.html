@@ -1357,7 +1357,10 @@ let voiceOn=true,vlist=[],vpick=null,speakTok=0,sentIdx=0,subsOn=true,speedF=1,c
 let stepT=null,stepStart=0,stepRemain=null,wasPlaying=false,finalOn=false;
 const INTRO=1.2,OUTRO=1.6;
 const vscore=v=>(/natural|online|neural/i.test(v.name)?10:0)+(/fr[-_]FR/i.test(v.lang)?3:0);
-const canSpeak=()=>voiceOn&&!!synth&&vlist.length>0;
+let speechBad=false;
+/* Android : getVoices() reste souvent vide jusqu'au premier speak() ; on tente donc de parler avec lang=fr-FR et on ne bascule en mode sans voix que si la synthèse échoue vraiment */
+const canSpeak=()=>voiceOn&&!!synth&&!speechBad;
+function speechFail(tok){if(tok!==speakTok||speechBad)return;speechBad=true;try{synth.cancel();}catch(e){}toast('La voix n’a pas démarré sur cet appareil : lecture sans voix. Touchez « Voix » pour réessayer.');stepRemain=null;refreshSub();if(playing)runStep();}
 function loadVoices(){
   if(!synth)return;vlist=synth.getVoices().filter(v=>/^fr/i.test(v.lang)).sort((a,b)=>vscore(b)-vscore(a));
   const sel=$('vsel');sel.replaceChildren(...vlist.map(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name.replace(/^(Microsoft|Google)\s+/,'').replace(/\s*Online \(Natural\)\s*-?\s*/,' ').slice(0,38);return o;}));
@@ -1366,7 +1369,7 @@ function loadVoices(){
 }
 if(synth){loadVoices();synth.onvoiceschanged=loadVoices;
   /* iOS : voiceschanged n'est pas toujours émis ; on réinterroge quelques secondes */
-  let tries=0;const poll=setInterval(()=>{if(vlist.length||++tries>20){clearInterval(poll);return}loadVoices()},500);}
+  let tries=0;const poll=setInterval(()=>{if(vlist.length||++tries>60){clearInterval(poll);return}loadVoices()},500);}
 const IOS=/iP(hone|ad|od)/.test(navigator.platform)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)||/iPhone|iPad/.test(navigator.userAgent);
 let speechUnlocked=false;
 function unlockSpeech(){ /* à appeler dans le geste : iOS n'autorise la voix qu'après une action de l'utilisateur */
@@ -1400,8 +1403,9 @@ function narrate(from){
     let done=false,dog2=null;const fin=()=>{if(done||tok!==speakTok)return;done=true;clearTimeout(dog);clearTimeout(dog2);say();};
     /* garde-fou : sur iOS, onend n'est parfois jamais émis */
     const dog=setTimeout(()=>{if(tok!==speakTok||!playing)return;if(!synth.speaking)fin();else dog2=setTimeout(fin,4000);},(ss[k].length/9+4)*1000/Math.max(.5,speedF));
-    u.onend=()=>{if(tok!==speakTok)return;if(t0){const dt=(performance.now()-t0)/1000;if(dt>1){cps=cps*.8+(ss[k].length/dt/u.rate)*.2;upTotal();}}fin();};
-    u.onerror=e=>{if(tok!==speakTok||e.error==='interrupted'||e.error==='canceled')return;fin();};
+    u.onend=()=>{if(tok!==speakTok)return;if(!t0){speechFail(tok);return;}if(t0){const dt=(performance.now()-t0)/1000;if(dt>1){cps=cps*.8+(ss[k].length/dt/u.rate)*.2;upTotal();}}fin();};
+    u.onerror=e=>{if(tok!==speakTok||e.error==='interrupted'||e.error==='canceled')return;if(!t0){speechFail(tok);return;}fin();};
+    if(k===from||k===0)setTimeout(()=>{if(!t0&&tok===speakTok&&playing&&!speechBad)speechFail(tok);},5000);
     synth.speak(u);
   };
   stepT=setTimeout(say,from?(IOS?300:250):INTRO*1000/speedF);
@@ -1410,14 +1414,15 @@ function setPlay(v){
   if(v&&finalOn)v=false;
   playing=v;const b=$('play');b.setAttribute('aria-pressed',v);b.textContent=v?'❚❚':'▶';b.setAttribute('aria-label',v?'Pause':'Lecture');b.title=v?'Pause (espace)':'Lecture (espace)';
   if(v){
-    if(voiceOn&&!canSpeak())toast('Aucune voix française sur ce poste : lecture sans voix.');
+    if(voiceOn&&!synth)toast('Ce navigateur ne propose pas de synthèse vocale : lecture sans voix.');
     if(canSpeak()){callTimers.forEach(clearTimeout);callTimers=[];}
     runStep();
   }else hold();
   refreshSub();
 }
 function setVoice(on){
-  if(on&&!(synth&&vlist.length)){toast('Aucune voix française n’est disponible sur ce poste.');on=false;}
+  if(on&&!synth){toast('Ce navigateur ne propose pas de synthèse vocale.');on=false;}
+  if(on)speechBad=false;
   hold();voiceOn=on;$('vbtn').setAttribute('aria-pressed',on);$('vsel').hidden=!on||!vlist.length;
   refreshSub();
   stepRemain=null;
