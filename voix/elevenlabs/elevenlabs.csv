@@ -1,0 +1,83 @@
+fichier,scene,debut_estime,duree_estimee_s,texte_avec_balises
+0_0,1,00:01,1.4,"[calm, documentary narration] Printemps 1944."
+0_1,1,00:03,12.3,"En Italie, les Alliés sont bloqués depuis l’automne devant la ligne Gustav, qui barre la péninsule de l’embouchure du Garigliano jusqu’à la mer Adriatique, en passant par Cassino."
+0_2,1,00:15,4.7,Trois offensives contre Cassino ont échoué entre janvier et mars.
+0_3,1,00:20,7.4,"Le débarquement d’Anzio, en janvier, devait déborder la ligne par la mer : la tête de pont reste enfermée."
+0_4,1,00:27,6.3,Le corps expéditionnaire français du général Juin combat en Italie depuis la fin de 1943.
+0_5,1,00:33,9.0,"Dans les montagnes des Abruzzes, puis au Belvédère, ses tirailleurs ont montré qu’ils savaient se battre là où d’autres piétinent."
+0_6,1,00:42,7.4,"En face, le maréchal Kesselring tient, avec des divisions aguerries, un terrain qui favorise le défenseur."
+1_0,2,00:52,7.8,"[calm, confident] Pour l’offensive de printemps, nommée Diadem, le général Alexander regroupe ses forces entre Cassino et la mer."
+1_1,2,01:00,11.3,"Le 4 avril, Juin propose au général Clark, qui commande la cinquième Armée américaine, de porter l’effort dans la montagne et de le confier au corps expéditionnaire."
+1_2,2,01:12,7.3,"Les monts Aurunci, sans routes, passent pour infranchissables, et les Allemands les tiennent légèrement."
+1_3,2,01:19,7.1,"Juin compte sur ses tirailleurs et sur les goumiers marocains du général Guillaume, avec leurs mulets."
+1_4,2,01:26,8.9,"Le corps compte alors environ cent douze mille hommes, dont soixante pour cent de Maghrébins encadrés par des officiers français."
+1_5,2,01:35,9.0,"Le plan est simple : percer au Majo, puis déborder par la montagne vers Pico, sur les arrières de la défense de la vallée du Liri."
+2_0,3,01:47,10.8,"[low voice, tense] Le 11 mai 1944, à 23 heures, l’artillerie alliée ouvre le feu sur tout le front, de Cassino à la mer : mille six cents pièces selon les sources américaines."
+2_1,3,01:58,5.5,"Dans la tête de pont du Garigliano, le corps expéditionnaire attaque aussitôt."
+2_2,3,02:03,8.4,"La deuxième division d’infanterie marocaine du général Dody doit enlever le mont Faito, puis le Majo, clé de la position."
+2_3,3,02:11,5.7,"Au nord, la première division de marche attaque vers la Cerasola et le Girofano."
+2_4,3,02:17,6.7,"Au sud, la troisième division d’infanterie algérienne du général de Monsabert vise Castelforte."
+2_5,3,02:24,9.2,"En face, la soixante et onzième division d’infanterie allemande tient des positions fortifiées, minées et préparées depuis des mois."
+2_6,3,02:33,6.4,"[dry, slightly ironic] La surprise est réelle : le général von Senger, qui commande le secteur, est en permission."
+3_0,4,02:42,2.3,"[serious] Le 12 mai, l’attaque piétine."
+3_1,4,02:44,7.9,"Les tirailleurs marocains prennent le Faito, et la troisième division algérienne enlève le village de Castelforte."
+3_2,4,02:52,8.0,"Ailleurs, sur la Cerasola et le Girofano, les assauts se brisent sur les champs de mines et les armes automatiques."
+3_3,4,03:00,7.4,"L’attaque a été lancée sans préparation d’artillerie, pour garder la surprise, et les pertes sont lourdes."
+3_4,4,03:08,4.2,"Le soir, sur tout le front allié, rien n’est encore percé."
+3_5,4,03:12,7.6,"[thoughtful]Juin juge pourtant que la défense allemande est usée, et décide de relancer l’attaque dès le lendemain matin."
+3_6,4,03:20,5.4,La friction est partout ; la décision tient à la lecture qu’en fait le chef.
+4_0,5,03:28,2.8,"[building energy] Le 13 mai, la défense allemande cède."
+4_1,5,03:31,3.0,"Vers 14 heures, le Girofano est nettoyé."
+4_2,5,03:34,14.3,"[proud]Vers quinze heures trente, les tirailleurs marocains de la deuxième division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde."
+4_3,5,03:48,4.7,[pause] La ligne Gustav est rompue sur le front du corps expéditionnaire.
+4_4,5,03:53,6.1,"La soixante et onzième division allemande, à bout de réserves, se replie vers l’ouest."
+4_5,5,03:59,12.6,"Les Alliés voisins, Américains sur la côte et Britanniques dans la vallée du Liri, progressent encore difficilement : la brèche française devient le point décisif de toute l’offensive."
+5_0,6,04:14,2.2,[determined] Juin exploite sans attendre.
+5_1,6,04:16,6.1,"Le 14 mai, ses divisions nettoient la rive gauche de l’Ausente et marchent sur Ausonia."
+5_2,6,04:23,4.8,"Le 15, elles forcent l’entrée du massif de la Petrella, à Castello."
+5_3,6,04:27,8.8,Juin engage alors son corps de montagne : la quatrième division marocaine de montagne et trois groupements de tabors marocains.
+5_4,6,04:36,5.8,"Ils doivent traverser les monts Aurunci, là où les Allemands n’attendent personne."
+5_5,6,04:42,8.5,"En agissant plus vite que l’adversaire ne peut se rétablir, Juin conserve la liberté d’action que la rupture lui a donnée."
+6_0,7,04:53,8.0,"[measured, admiring] Du 15 au 17 mai, goumiers et tirailleurs de montagne s’enfoncent dans un massif sans routes, presque sans sentiers."
+6_1,7,05:01,4.4,"Les mulets portent les armes lourdes, les munitions et l’eau."
+6_2,7,05:06,9.5,"Les colonnes franchissent la Petrella et poussent vers le mont Revole, pour tomber sur les arrières d’Esperia, du Monte d’Oro et de Pico."
+6_3,7,05:15,8.6,"Les Allemands, qui croyaient le massif infranchissable, voient surgir des troupes là où ils n’avaient laissé que des postes."
+6_4,7,05:24,5.3,Une troupe adaptée à son milieu transforme un obstacle en axe de manœuvre.
+7_0,8,05:32,2.0,"[steady] Le 17 mai, Esperia tombe."
+7_1,8,05:34,7.7,"Menacée d’être prise à revers par les colonnes de montagne, la défense allemande ne peut plus tenir la vallée."
+7_2,8,05:42,9.6,"Le commandement allemand engage ses renforts par fractions, à mesure qu’ils arrivent : trop tard et trop dispersés pour colmater la brèche."
+7_3,8,05:51,6.8,"Pendant ce temps, sur la côte, le deuxième corps américain avance à son tour vers Formia et Itri."
+7_4,8,05:58,4.9,La manœuvre par la montagne a fait sauter la charnière de la défense.
+8_0,9,06:06,10.9,"[solemn] Le 18 mai, au nord, les soldats du deuxième corps polonais occupent les ruines de l’abbaye du Mont-Cassin, que les parachutistes allemands viennent d’évacuer."
+8_1,9,06:17,4.6,"Dans la vallée du Liri, la huitième Armée britannique progresse."
+8_2,9,06:21,6.3,Le débordement français par le sud a contribué à rendre la position de Cassino intenable.
+8_3,9,06:28,9.3,"Les Allemands se replient sur leur deuxième ligne, la ligne Hitler, rebaptisée ligne Senger, de Pontecorvo à Aquino, avec Pico au sud."
+8_4,9,06:37,7.8,La victoire de Diadem est une victoire de coalition : chaque corps fixe l’adversaire pendant qu’un autre perce.
+9_0,10,06:48,4.9,"[tense] Pico, verrou de la ligne Senger au sud, est défendu avec acharnement."
+9_1,10,06:52,3.6,Le corps expéditionnaire y livre de durs combats.
+9_2,10,06:56,2.2,"Le 22 mai, Pico tombe enfin."
+9_3,10,06:58,6.8,"Du 23 au 25 mai, la vingt-sixième Panzerdivision contre-attaque encore pour reprendre le terrain."
+9_4,10,07:05,5.1,"Face à des chars, l’infanterie française doit durer, tenir et relancer."
+9_5,10,07:10,4.0,La prise de Pico ouvre le flanc sud de la ligne Senger.
+10_0,11,07:17,3.0,"[somber, slow] [pause] Cette campagne a aussi une face sombre."
+10_1,11,07:20,12.8,"Entre avril et juin 1944, des soldats du corps expéditionnaire, surtout des goumiers, commettent des viols, des meurtres et des pillages contre les civils du sud du Latium, la Ciociaria."
+10_2,11,07:33,14.5,"Les estimations varient : de deux à trois mille victimes selon le ministère italien de la Défense en 1997, quatre à cinq mille viols selon l’historienne Julie Le Gac, davantage selon les associations de victimes."
+10_3,11,07:47,3.8,Les Italiens appellent ces crimes les marocchinate.
+10_4,11,07:51,9.5,"[slow, heavy] Ils rappellent que la discipline et le respect du droit font partie de la valeur d’une troupe, au même titre que son efficacité au combat."
+11_0,12,08:03,3.6,"[urgent] Le 23 mai, les Alliés attaquent la ligne Senger."
+11_1,12,08:07,3.5,Les Canadiens enlèvent Pontecorvo le jour même.
+11_2,12,08:10,5.6,"Le même jour, le sixième corps américain sort enfin de la tête de pont d’Anzio."
+11_3,12,08:16,6.9,"La dixième Armée allemande doit se replier vers le nord, par la vallée du Liri et les monts Ausoni."
+11_4,12,08:23,7.5,"Le corps expéditionnaire continue de manœuvrer par les hauteurs, débordant chaque position par la montagne."
+11_5,12,08:30,3.5,La défense allemande au sud de Rome s’effondre.
+12_0,13,08:37,8.9,[reflective] Le général Alexander voulait que les forces sorties d’Anzio coupent à Valmontone la route de repli de la dixième Armée allemande.
+12_1,13,08:46,5.0,"Fin mai, le général Clark oriente l’essentiel de son effort vers Rome."
+12_2,13,08:51,6.9,Une partie des divisions allemandes échappe ainsi à l’encerclement et ira se rétablir plus au nord.
+12_3,13,08:58,5.2,"Le corps expéditionnaire, lui, poursuit par les monts au sud-est de Rome."
+12_4,13,09:03,6.8,"[thoughtful] Détruire l’armée ennemie, ou prendre la capitale : c’est le grand débat de cette fin de bataille."
+13_0,14,09:12,3.4,"[warm, conclusive] Le 4 juin 1944, les Alliés entrent dans Rome."
+13_1,14,09:16,8.7,"Le 5, le général Clark fait son entrée dans la ville, accompagné de ses commandants de corps, parmi lesquels le général Juin."
+13_2,14,09:24,7.8,"La première division de marche hisse le drapeau tricolore sur le palais Farnèse, siège de l’ambassade de France."
+13_3,14,09:32,5.9,"[pause] Deux jours plus tard, le débarquement de Normandie relègue l’Italie au second plan."
+13_4,14,09:38,9.4,"Au Garigliano, l’armée française renaissante a montré qu’elle savait concevoir et réussir une manœuvre décisive au sein d’une coalition."
+13_5,14,09:48,9.2,"[slow, conclusive] Surprise, exploitation par la montagne, rythme maintenu : la victoire tient à la compréhension du terrain et à l’audace de son chef."
