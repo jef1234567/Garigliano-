@@ -144,10 +144,10 @@ Réglage de la scène : `[serious]` (à placer en tête de la première phrase)
 > Le soir, sur tout le front allié, rien n’est encore percé.
 
 **3_5** `03:12` (7.6 s)
-> [thoughtful]Juin juge pourtant que la défense allemande est usée, et décide de relancer l’attaque dès le lendemain matin.
+> Juin juge pourtant que la défense allemande est usée, et décide de relancer l’attaque dès le lendemain matin.
 
 **3_6** `03:20` (5.4 s)
-> La friction est partout ; la décision tient à la lecture qu’en fait le chef.
+> [thoughtful] La friction est partout ; la décision tient à la lecture qu’en fait le chef.
 
 
 ## Scène 5 sur 14 · Le drapeau sur le Majo
@@ -162,10 +162,10 @@ Réglage de la scène : `[building energy]` (à placer en tête de la première 
 > Vers 14 heures, le Girofano est nettoyé.
 
 **4_2** `03:34` (14.3 s)
-> [proud]Vers quinze heures trente, les tirailleurs marocains de la deuxième division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde.
+> [proud] Vers quinze heures trente, les tirailleurs marocains de la deuxième division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde.
 
 **4_3** `03:48` (4.7 s)
-> [pause] La ligne Gustav est rompue sur le front du corps expéditionnaire.
+> La ligne Gustav est rompue sur le front du corps expéditionnaire.
 
 **4_4** `03:53` (6.1 s)
 > La soixante et onzième division allemande, à bout de réserves, se replie vers l’ouest.

@@ -24,12 +24,12 @@ fichier,scene,debut_estime,duree_estimee_s,texte_avec_balises
 3_2,4,02:52,8.0,"Ailleurs, sur la Cerasola et le Girofano, les assauts se brisent sur les champs de mines et les armes automatiques."
 3_3,4,03:00,7.4,"L’attaque a été lancée sans préparation d’artillerie, pour garder la surprise, et les pertes sont lourdes."
 3_4,4,03:08,4.2,"Le soir, sur tout le front allié, rien n’est encore percé."
-3_5,4,03:12,7.6,"[thoughtful]Juin juge pourtant que la défense allemande est usée, et décide de relancer l’attaque dès le lendemain matin."
-3_6,4,03:20,5.4,La friction est partout ; la décision tient à la lecture qu’en fait le chef.
+3_5,4,03:12,7.6,"Juin juge pourtant que la défense allemande est usée, et décide de relancer l’attaque dès le lendemain matin."
+3_6,4,03:20,5.4,[thoughtful] La friction est partout ; la décision tient à la lecture qu’en fait le chef.
 4_0,5,03:28,2.8,"[building energy] Le 13 mai, la défense allemande cède."
 4_1,5,03:31,3.0,"Vers 14 heures, le Girofano est nettoyé."
-4_2,5,03:34,14.3,"[proud]Vers quinze heures trente, les tirailleurs marocains de la deuxième division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde."
-4_3,5,03:48,4.7,[pause] La ligne Gustav est rompue sur le front du corps expéditionnaire.
+4_2,5,03:34,14.3,"[proud] Vers quinze heures trente, les tirailleurs marocains de la deuxième division atteignent le sommet du Majo et y hissent un immense drapeau tricolore, de trente mètres carrés, visible à des kilomètres à la ronde."
+4_3,5,03:48,4.7,La ligne Gustav est rompue sur le front du corps expéditionnaire.
 4_4,5,03:53,6.1,"La soixante et onzième division allemande, à bout de réserves, se replie vers l’ouest."
 4_5,5,03:59,12.6,"Les Alliés voisins, Américains sur la côte et Britanniques dans la vallée du Liri, progressent encore difficilement : la brèche française devient le point décisif de toute l’offensive."
 5_0,6,04:14,2.2,[determined] Juin exploite sans attendre.
